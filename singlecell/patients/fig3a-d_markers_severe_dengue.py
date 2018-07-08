@@ -24,47 +24,6 @@ from singlecell.patients.cell_subtypes import cell_subtypes
 
 
 # Functions
-def split_cells_by_subtype_and_patient(ds, cell_subtypes):
-    '''Split Dataset of cells by subtype'''
-    n_subtype = []
-    ds_sub_pats = {}
-    for ct, subtypes in cell_subtypes.items():
-        if ct != 'all':
-            dsct = ds.query_samples_by_metadata('cellType == @ct', local_dict=locals())
-        else:
-            dsct = ds
-        for cst, query in subtypes.items():
-            print(ct, cst)
-            # FIXME: refine
-            if 'isotype' in query:
-                dscst = dsct.query_samples_by_metadata(query)
-            elif cst == 'all':
-                dscst = dsct
-            else:
-                dscst = dsct.query_samples_by_counts(query)
-            print(dscst)
-            dspat = dscst.split(phenotypes='experiment')
-            for expname, dstmp in dspat.items():
-                ds_sub_pats[(ct, cst, expname)] = dstmp
-                n_subtype.append({
-                    'cellType': ct,
-                    'subtype': cst,
-                    'experiment': expname,
-                    'n': dstmp.n_samples,
-                    })
-    n_subtype = (
-        pd.DataFrame(n_subtype)
-          .set_index(['cellType', 'subtype', 'experiment'])
-          .unstack()
-          .fillna(0)
-          .loc[:, 'n']
-          .T)
-
-    return {
-        'n': n_subtype,
-        'datasets': ds_sub_pats,
-        }
-
 def split_cells_by_subtype(ds, cell_subtypes):
     '''Split Dataset of cells by subtype'''
     n_subtype = []

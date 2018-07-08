@@ -65,45 +65,6 @@ def split_cells_by_subtype_and_patient(ds, cell_subtypes):
         'datasets': ds_sub_pats,
         }
 
-def split_cells_by_subtype(ds, cell_subtypes):
-    '''Split Dataset of cells by subtype'''
-    n_subtype = []
-    ds_sub = {}
-    for ct, subtypes in cell_subtypes.items():
-        if ct != 'all':
-            dsct = ds.query_samples_by_metadata('cellType == @ct', local_dict=locals())
-        else:
-            dsct = ds
-        for cst, query in subtypes.items():
-            print(ct, cst)
-            # FIXME: refine
-            if 'isotype' in query:
-                dscst = dsct.query_samples_by_metadata(query)
-            elif cst == 'all':
-                dscst = dsct
-            else:
-                dscst = dsct.query_samples_by_counts(query)
-            print(dscst)
-            ds_sub[(ct, cst)] = dscst
-            n_subtype.append({
-                'cellType': ct,
-                'subtype': cst,
-                'n': dscst.n_samples,
-                })
-    n_subtype = (
-        pd.DataFrame(n_subtype)
-          .set_index(['cellType', 'subtype'])
-          .fillna(0)
-          .loc[:, 'n']
-          .T)
-
-    return {
-        'n': n_subtype,
-        'datasets': ds_sub,
-        }
-
-
-
 
 # Script
 if __name__ == '__main__':
@@ -200,26 +161,6 @@ if __name__ == '__main__':
     pvals = pd.DataFrame(pvals, index=idx).fillna(1).T
     logfold = pd.DataFrame(logfold, index=idx).fillna(0).T
 
-    if False:
-        print('Plot cumulative distributions for P values')
-        fig, ax = plt.subplots(1, 1, figsize=(5, 3.5))
-        xmin = 1
-        colors = sns.color_palette('husl', n_colors=pvals.shape[1])
-        for ic, (ct, cst) in enumerate(pvals.columns):
-            x = np.sort(pvals[(ct, cst)].values)
-            y = 1.0 - np.linspace(0, 1, len(x))
-            xmin = min(x.min(), xmin)
-            ax.plot(x, y, lw=2, label='{:}, {:}'.format(ct, cst), color=colors[ic])
-        ax.legend(loc='lower left', ncol=2, fontsize=8)
-        ax.set_xlim(1e-10, 1e-1)
-        ax.set_ylim(0.001, 1.1)
-        ax.set_xscale('log')
-        ax.set_xlabel('P value')
-        ax.set_ylabel('# genes with P > x')
-        ax.set_title('P values of Welch\'s test on means')
-        ax.grid(True)
-        plt.tight_layout()
-
     print('Show best discriminating genes for each subtype')
     def get_log2fold_change(ct, cst, genes):
         return logfold.loc[genes, (ct, cst)] / np.log10(2)
@@ -284,117 +225,8 @@ if __name__ == '__main__':
             plt.tight_layout()
         return ax
 
-    if False:
-        print('Plot ROC curves for all cell types')
-        fig, axs = plt.subplots(3, 9, figsize=(14, 4), sharex=True, sharey=True)
-        axs = axs.ravel()
-        for iax, ((ct, cst), ax) in enumerate(zip(n_subtype.columns, axs)):
-            pval = pvals[(ct, cst)]
-            ptop = pval.nsmallest(20)
-            ptop = pd.DataFrame([ptop, logfold.loc[ptop.index, (ct, cst)] / np.log10(2)], index=['P value', 'log2fold'], columns=ptop.index).T
-            # Filter only decently overexpressed
-            ptop = ptop.loc[ptop['log2fold'] >= 4].iloc[:3]
-
-            if len(ptop):
-                plot_roc(ct, cst, ptop.index, ax=ax, legend=True)
-            ax.set_title('{:}\n{:}'.format(ct, cst), fontsize=8)
-            ax.set_xlim(-0.05, 1.05)
-            ax.set_ylim(-0.05, 1.05)
-        fig.text(0.5, 0.02, 'False positive rate', ha='center')
-        fig.text(0.02, 0.5, 'True positive rate', ha='center', va='center', rotation=90)
-        plt.tight_layout(rect=[0.03, 0.02, 1, 1], w_pad=0, h_pad=1)
-
-    print('Plot ROC curves for some cell types and genes')
     # FIG3E
-    fig, axs = plt.subplots(1, 4, figsize=(12, 3), sharex=True, sharey=True)
-    axs = axs.ravel()
-    ctst_pairs = [
-            (('T cell', 'all'), ('IFI44L', 'ISG15', 'IFI6')),
-            (('NK cell', 'all'), ('IFI44L', 'IFI6', 'MX1')),
-            (('B cell', 'all'), ('IFI44L', 'IFI6', 'IFIT3')),
-            (('monocyte', 'all'), ('IFIT3', 'RSAD2', 'MX1')),
-            ]
-    frame_colors = [sns.color_palette(n_colors=7)[i] for i in [0, 1, 3, 4]]
-    for iax, (((ct, cst), genes), ax, frame_color) in enumerate(zip(ctst_pairs, axs, frame_colors)):
-        pval = pvals[(ct, cst)]
-        log2fold_changes = get_log2fold_change(ct, cst, list(genes))
-        labels = ['{:}: {:1.1f}'.format(g, x) for g, x in log2fold_changes.items()]
-        plot_roc(ct, cst, list(genes), ax=ax, legend=False, labels=labels, alpha=0.5)
-        ax.legend(loc='lower right')
-        ax.set_title('{:}s'.format(ct))
-        ax.set_xlim(-0.05, 1.05)
-        ax.set_ylim(-0.05, 1.05)
-        ax.set_xticks([0, 0.5, 1])
-        ax.set_yticks([0, 0.5, 1])
-        rect = Rectangle(
-                (0.0635 + 0.2385 * iax, 0.084),
-                0.215, 0.89,
-                transform=fig.transFigure,
-                lw=3,
-                edgecolor=frame_color,
-                facecolor='none',
-                zorder=10,
-                clip_on=False)
-        ax.add_patch(rect)
-    fig.text(0.5, 0.02, 'False positive rate', ha='center')
-    fig.text(0.02, 0.5, 'True positive rate', ha='center', va='center', rotation=90)
-    plt.tight_layout(rect=[0.03, 0.042, 1, 1], w_pad=3, h_pad=1)
-    fig.text(0.01, 0.99, 'D', ha='left', va='top', fontsize=16)
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3E.png')
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3E.svg')
-
-    print('Plot ROC curves for MORE cell types and genes')
-    # FIG3E, alternative version
-    fig, axs = plt.subplots(3, 4, figsize=(8.3, 7), sharex=True, sharey=True)
-    axs = axs.ravel()
-    ctst_pairs = [
-            (('T cell', 'all'), ('IFI6', 'ISG15', 'IFI44L')),
-            (('NK cell', 'all'), ('IFI6', 'MX1', 'IFI44L')),
-            (('B cell', 'all'), ('IFI6', 'IFI44L', 'IFIT3')),
-            (('monocyte', 'all'), ('MX1', 'IFIT3', 'RSAD2')),
-            (('T cell', 'helper'), ('ISG15', 'IFIT3', 'IFITM3')),
-            (('NK cell', 'CD16+'), ('IFI6', 'IFIT3', 'MX1')),
-            (('NK cell', 'KIR2DL3+'), ('STAT1', 'PTPN6', 'LRP10')),
-            (('B cell', 'naive'), ('IFITM1', 'MX2', 'UBE2L6')),
-            (('B cell', 'plasma'), ('IGHG1', 'IGHG4', 'IGHG2')),
-            (('B cell', 'tyrobp'), ('IFI44L', 'ISG15', 'IFI27')),
-            (('monocyte', 'double_positive'), ('CD163', 'IFI27', 'IFIT1')),
-            (('monocyte', 'classical'), ('IFI27', 'IFI6', 'RSAD2')),
-            ]
-    frame_colors = [sns.color_palette(n_colors=7)[i] for i in [0, 1, 3, 4, 0, 1, 1, 3, 3, 3, 4, 4]]
-    for iax, (((ct, cst), genes), ax, frame_color) in enumerate(zip(ctst_pairs, axs, frame_colors)):
-        pval = pvals[(ct, cst)]
-        log2fold_changes = get_log2fold_change(ct, cst, list(genes))
-        labels = ['{:}: {:1.1f}'.format(g, x) for g, x in log2fold_changes.items()]
-        plot_roc(ct, cst, list(genes), ax=ax, legend=False, labels=labels, alpha=0.5)
-        ax.legend(loc='lower right', fontsize=9)
-        if cst == 'all':
-            ax.set_title('{:}s'.format(ct), fontsize=11)
-        else:
-            ax.set_title('{:}s, {:}'.format(ct, cst), fontsize=9)
-        ax.set_xlim(-0.05, 1.05)
-        ax.set_ylim(-0.05, 1.05)
-        ax.set_xticks([0, 0.5, 1])
-        ax.set_yticks([0, 0.5, 1])
-        rect = Rectangle(
-                (0.078 + 0.231 * (iax % 4), 0.692 - 0.3157 * (iax // 4)),
-                0.218, 0.303,
-                transform=fig.transFigure,
-                lw=3,
-                edgecolor=frame_color,
-                facecolor='none',
-                zorder=10,
-                clip_on=False)
-        ax.add_patch(rect)
-    fig.text(0.5, 0.02, 'False positive rate', ha='center')
-    fig.text(0.02, 0.5, 'True positive rate', ha='center', va='center', rotation=90)
-    fig.text(0.01, 0.99, 'E', ha='left', va='top', fontsize=16)
-    plt.tight_layout(rect=[0.03, 0.042, 1, 1], w_pad=0.5, h_pad=2)
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3E.png')
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3E.svg')
-
     print('Plot ROC curves for some more cell types and genes')
-    # FIG3E, alternative version
     fig, axs = plt.subplots(2, 4, figsize=(8.3, 4.5), sharex=True, sharey=True)
     axs = axs.ravel()
     ctst_pairs = [
@@ -439,12 +271,8 @@ if __name__ == '__main__':
     fig.text(0.02, 0.5, 'True positive rate', ha='center', va='center', rotation=90)
     fig.text(0.01, 0.99, 'E', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.03, 0.042, 1, 1], w_pad=0.5, h_pad=2.4)
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3E.png')
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3E.svg')
-
-
-
-
+    #fig.savefig('../../figures/fig3E.png')
+    #fig.savefig('../../figures/fig3E.svg')
 
     plt.ion()
     plt.show()
