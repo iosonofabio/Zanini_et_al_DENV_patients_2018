@@ -188,8 +188,8 @@ if __name__ == '__main__':
     # Some genes are most likely batch effects
     compsset = compsset.loc[~compsset.index.isin(['TNR', 'KNG1', 'bP-2189O9.2', 'MGC39584'])]
 
-    print('Plot global picture of overexpression in SD')
     # FIG 3A
+    print('Plot global picture of overexpression in SD')
     from scipy.cluster.hierarchy import linkage, leaves_list
     logfol_set = compsset.loc[:, compsset.columns.get_level_values(2) == 'log2foldchange']
     pval_set = compsset.loc[:, compsset.columns.get_level_values(2) == 'P-value']
@@ -225,12 +225,14 @@ if __name__ == '__main__':
             rotation=45, ha='right', fontsize=9)
     ax.set_ylim(-0.5, len(ll_genes) - 0.5)
     ax.set_xlim(-0.5, len(ll_subtypes) - 0.5)
+    fig.text(0.01, 0.99, 'A', ha='left', va='top', fontsize=16)
     plt.tight_layout()
-    fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3A.svg')
-    fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3A.png')
 
-    print('Plot distribution of genes common across cell types')
+    #fig.savefig('../../figures/fig3A.svg')
+    #fig.savefig('../../figures/fig3A.png')
+
     # FIG 3B-D
+    print('Plot distribution of genes common across cell types')
     cell_types = ['T cell', 'NK cell', 'NKT cell', 'B cell', 'monocyte', 'cDC', 'pDC']
     genes = ['IFITM1', 'IFIT3', 'CD163']
     dsg = ds.query_features_by_name(genes)
@@ -297,83 +299,8 @@ if __name__ == '__main__':
     fig.text(0.01, 0.68, 'C', ha='left', va='top', fontsize=16)
     fig.text(0.01, 0.37, 'D', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.015, 0.04, 1, 1])
-    fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3B-D.svg')
-    fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig3B-D.png')
-
-    if False:
-        print('Plot distribution of genes common across cell types (for a slide)')
-        cell_types = ['T cell', 'NK cell', 'NKT cell', 'B cell', 'monocyte', 'cDC', 'pDC']
-        genes = ['IFITM1', 'IFIT3', 'CXCL10']
-        dsg = ds.query_features_by_name(genes)
-        fig, axs = plt.subplots(
-                len(genes), len(cell_types),
-                figsize=(10, 6),
-                sharex=True, sharey=True,
-                )
-        axs = axs.T
-        dsct = dsg.split(phenotypes='cellType')
-        for icol, (ct, axcol) in enumerate(zip(cell_types, axs)):
-            for irow, (gene, ax) in enumerate(zip(genes, axcol)):
-                data = np.log10(0.1 + dsct[ct].counts.loc[[gene]].T)
-                data['dengue_severity'] = dsct[ct].samplesheet['dengue_severity']
-                sns.violinplot(
-                        data=data,
-                        y=gene,
-                        x='dengue_severity',
-                        order=[0, 1, 2],
-                        ax=ax,
-                        zorder=4,
-                        scale='width',
-                        palette=["#9b59b6", "#3498db", "#2ecc71"],
-                        )
-                if icol == 0:
-                    ax.set_ylabel(gene, rotation=0, ha='right')
-                else:
-                    ax.set_ylabel('')
-                ax.set_xlabel('')
-                if irow == len(genes) - 1:
-                    ax.set_xticklabels(['CT', 'DF', 'SD'])
-                elif irow == 0:
-                    ax.set_title(ct)
-                ax.set_ylim(-1.1, 4.3)
-                ax.set_yticks(np.log10(np.array([0.1, 1, 10, 100, 1000, 10000])))
-                ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$'])
-                for yi in np.arange(-1, 5):
-                    ax.plot([-1, 3], [yi, yi], lw=1, color='grey', zorder=0)
-            rect = Rectangle(
-                    (0.135 + 0.1225 * icol, 0.054),
-                    0.117, 0.936,
-                    transform=fig.transFigure,
-                    lw=3,
-                    edgecolor=sns.color_palette()[icol],
-                    facecolor='none',
-                    zorder=10,
-                    clip_on=False)
-            ax.add_patch(rect)
-        fig.text(0.52, 0.02, 'dengue severity (CT/DF/SD)', ha='center')
-        fig.text(0.023, 0.5, 'counts per million', ha='center', va='center', rotation=90)
-        plt.tight_layout(rect=[0.03, 0.04, 1, 1])
-
-    if False:
-        print('Annotate B cells by isotype')
-        isotypes = ('M', 'D', 'G1', 'G2', 'G3', 'G4', 'E', 'A1', 'A2')
-        dsB = ds.query_samples_by_metadata('cellType == "B cell"')
-        dsB.query_features_by_name(['IGH{:}'.format(i) for i in isotypes], inplace=True)
-        isos = [isotypes[row.argmax()] for row in dsB.counts.values.T]
-        ds.samplesheet['isotype'] = ''
-        ds.samplesheet.loc[dsB.samplenames, 'isotype'] = isos
-        from singlecell.googleapi.samplesheet import SampleSheet
-        ss = SampleSheet(sandbox=False)
-        data = ss.get_data(sheetname='sequenced')
-        header = data[0]
-        name_col = header.index('name')
-        iso_col = header.index('isotype')
-        for datum in data[1:]:
-            if datum[name_col] in dsB.samplesheet.index:
-                if len(datum) <= iso_col:
-                    datum.extend(['' for i in range(iso_col + 1 - len(datum))])
-                datum[iso_col] = ds.samplesheet.loc[datum[name_col], 'isotype']
-        #ss.set_sheet(sheetname='sequenced', values=data)
+    #fig.savefig('../../figures/fig3B-D.svg')
+    #fig.savefig('../../figures/fig3B-D.png')
 
     plt.ion()
     plt.show()
