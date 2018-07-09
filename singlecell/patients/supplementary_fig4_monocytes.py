@@ -178,7 +178,7 @@ if __name__ == '__main__':
     ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
     ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
     fig.text(0.5, 0.02,
-             'is the cell infected?'.format(nvr),
+             'is the cell associated with DENV?'.format(nvr),
              ha='center',
              )
     fig.text(0.02, 0.58, 'counts per million', rotation=90, ha='center')
@@ -243,7 +243,7 @@ if __name__ == '__main__':
     #ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
     #ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
     #fig.text(0.5, 0.02,
-    #         'is the cell infected?'.format(nvr),
+    #         'is the cell associated with DENV?'.format(nvr),
     #         ha='center',
     #         )
     #fig.text(0.027, 0.63, 'counts per million', rotation=90, ha='center')

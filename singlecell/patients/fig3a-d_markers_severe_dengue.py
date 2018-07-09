@@ -234,7 +234,7 @@ if __name__ == '__main__':
                 ax.set_ylabel('')
             ax.set_xlabel('')
             if irow == len(genes) - 1:
-                ax.set_xticklabels(['CT', 'DF', 'SD'])
+                ax.set_xticklabels(['H', 'D', 'SD'])
             elif irow == 0:
                 ax.set_title(ct)
             ax.set_ylim(-1.1, 4.3)
@@ -252,14 +252,14 @@ if __name__ == '__main__':
                 zorder=10,
                 clip_on=False)
         ax.add_patch(rect)
-    fig.text(0.52, 0.02, 'dengue severity (CT/DF/SD)', ha='center')
+    fig.text(0.52, 0.02, 'diagnosis (H/D/SD)', ha='center')
     fig.text(0.015, 0.5, 'counts per million', ha='center', va='center', rotation=90)
     fig.text(0.01, 0.99, 'B', ha='left', va='top', fontsize=16)
     fig.text(0.01, 0.68, 'C', ha='left', va='top', fontsize=16)
     fig.text(0.01, 0.37, 'D', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.015, 0.04, 1, 1])
-    #fig.savefig('../../figures/fig3B-D.svg')
-    #fig.savefig('../../figures/fig3B-D.png')
+    fig.savefig('../../figures/fig3B-D.svg')
+    fig.savefig('../../figures/fig3B-D.png')
 
     plt.ion()
     plt.show()
