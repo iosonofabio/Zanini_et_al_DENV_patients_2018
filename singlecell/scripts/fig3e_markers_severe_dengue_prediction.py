@@ -19,7 +19,7 @@ import seaborn as sns
 os.environ['SINGLET_CONFIG_FILENAME'] = 'singlet.yml'
 sys.path.append('/home/fabio/university/postdoc/singlet')
 from singlet.dataset import Dataset, CountsTable, FeatureSheet
-from singlecell.patients.cell_subtypes import cell_subtypes
+from singlecell.modules.cell_subtypes import cell_subtypes
 
 
 
