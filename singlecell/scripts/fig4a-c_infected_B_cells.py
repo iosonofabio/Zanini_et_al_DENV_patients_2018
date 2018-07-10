@@ -97,17 +97,17 @@ if __name__ == '__main__':
     gby = dss.samplesheet[['infected', 'cellType']].groupby('cellType')
     inf_by = gby.mean()['infected']
     inf_by = inf_by[ctypes_order]
-    fig, axs = plt.subplots(1, 2, figsize=(6.3, 3), gridspec_kw={'width_ratios': [1.8, 1]})
+    fig, axs = plt.subplots(1, 2, figsize=(4.8, 3), gridspec_kw={'width_ratios': [1.8, 1]})
     ax = axs[0]
     colors = sns.color_palette(n_colors=7)
     inf_by.plot.barh(ax=ax, zorder=10)
     for iy, ct in enumerate(inf_by.index):
         n = gby.sum()['infected'][ct]
         ax.text(
-            inf_by[ct] + 0.02 + (0.03 * (inf_by[ct] > 0)), iy,
+            inf_by[ct] + 0.02 + (0.01 * (inf_by[ct] > 0)), iy,
             '{:}/{:}'.format(str(int(n)), str(int(gby.count().loc[ct]))),
             ha='left', va='center',
-            bbox={'edgecolor': colors[iy], 'facecolor': 'white', 'alpha': 0.7, 'lw': 3, 'pad': 5},
+            bbox={'edgecolor': colors[iy], 'facecolor': 'white', 'alpha': 0.7, 'lw': 2, 'pad': 2},
             )
     ax.set_ylabel('')
     ax.set_xlim(0, 0.57)
@@ -143,15 +143,15 @@ if __name__ == '__main__':
             )
     ax.set_xlim(-1.1, 5.1)
     ax.set_xticks([-1, 0, 1, 2, 3, 4, 5])
-    ax.set_xticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'], va='bottom')
+    ax.set_xticklabels(['$0$', '', '$10$', '', '$10^3$', '', '$10^5$'], va='bottom')
     ax.tick_params(axis='x', which='major', pad=14)
-    ax.set_xlabel('Virus reads per million RNA')
+    ax.set_xlabel('DENV/million reads')
     ax.set_ylabel('')
     ax.set_yticklabels([])
     for yt in np.arange(-1, 6):
         ax.plot([yt] * 2, [-1, 8], lw=1, color='grey', alpha=0.5, zorder=0.5)
     fig.text(0.01, 0.98, 'A', ha='left', va='top', fontsize=14)
-    plt.tight_layout(w_pad=0.1)
+    plt.tight_layout(w_pad=0.1, h_pad=0)
     #fig.savefig('../../figures/fig4A.svg')
     #fig.savefig('../../figures/fig4A.png')
 
@@ -169,10 +169,10 @@ if __name__ == '__main__':
     comp['avg_uninf'] = dsi['no'].counts.mean(axis=1)
     comp['fold-change'] = comp['avg_inf'] - comp['avg_uninf']
 
-    genes = ['IGHM', 'IGHD', 'TCL1A', 'CXCR4', 'CD69', 'IRF1', 'FCRL1', 'TXNIP']
+    genes = ['IGHM', 'IGHD', 'TCL1A', 'CXCR4', 'CD69', 'IRF1']#, 'FCRL1', 'TXNIP']
     dsbp = dsb.query_samples_by_metadata('infected != "ambiguous"')
     from matplotlib.patches import Rectangle
-    fig, axs = plt.subplots(2, 4, sharex=True, sharey=True, figsize=(6.3, 4))
+    fig, axs = plt.subplots(1, 6, sharex=True, sharey=True, figsize=(8, 2.2))
     axs = axs.ravel()
     for gname, ax in zip(genes, axs):
         dfi = comp.loc[gname]
@@ -217,7 +217,7 @@ if __name__ == '__main__':
              'is the cell associated with DENV?'.format(nvr),
              ha='center',
              )
-    fig.text(0.027, 0.63, 'counts per million', rotation=90, ha='center')
+    fig.text(0.027, 0.68, 'counts per million', rotation=90, ha='center')
     fig.text(0.01, 0.98, 'B', ha='left', va='top', fontsize=14)
     plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=1.2)
     fig.savefig('../../figures/fig4B.svg')
@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
     vs = dsdr.dimensionality.tsne(transform=None, perplexity=20)
 
-    fig, axs = plt.subplots(6, 1, figsize=(2, 6.8), sharex=True, sharey=True)
+    fig, axs = plt.subplots(3, 2, figsize=(3.5, 3.0), sharex=True, sharey=True)
     axs = axs.ravel()
     x = vs.iloc[:, 0]
     y = vs.iloc[:, 1]
@@ -282,13 +282,13 @@ if __name__ == '__main__':
     for ax, gname in zip(axs, feas_plot):
         if gname in dsdr.counts.index:
             v = dsdr.counts.loc[gname].values
-            ax.set_title(gname)
+            ax.set_title(gname, fontsize=10)
         elif gname in dsdr.samplesheet.columns:
             v = dsdr.samplesheet[gname]
             if 'virus' in gname:
-                ax.set_title('Virus abundance')
+                ax.set_title('Virus', fontsize=10)
             elif 'exp' in gname:
-                ax.set_title('Patient')
+                ax.set_title('Patient', fontsize=10)
         else:
             v = 'grey'
 
@@ -314,12 +314,13 @@ if __name__ == '__main__':
     ax.set_xlabel('dimension 1')
     ax.set_ylabel('dimension 2')
     fig.text(0.01, 0.98, 'C', ha='left', va='top', fontsize=14)
-    plt.tight_layout(rect=[-0.15, 0.06, 1, 1])
-    ax = fig.add_axes([0.15, 0.09, 0.7, 0.015])
+    plt.tight_layout(rect=[-0.12, -0.15, 0.73, 1], h_pad=0.4, w_pad=0)
+    #ax = fig.add_axes([0.15, 0.19, 0.7, 0.015])
+    ax = fig.add_axes([0.75, 0.05, 0.02, 0.85])
     norm = mpl.colors.Normalize(vmin=0, vmax=1)
     cb = mpl.colorbar.ColorbarBase(
         ax=ax, cmap='viridis', norm=norm,
-        orientation="horizontal")
+        orientation="vertical")
     cb.set_label('Gene/virus expression\n(relative to highest cell)')
     fig.savefig('../../figures/fig4C.svg')
     fig.savefig('../../figures/fig4C.png')
