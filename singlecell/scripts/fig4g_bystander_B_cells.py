@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     print('Load data (L1 normalized)')
     ds = Dataset(
-            samplesheet='virus',
+            samplesheet='dengue_patients',
             counts_table='dengue_patients',
             featuresheet='dengue_patients',
             )
@@ -106,8 +106,9 @@ if __name__ == '__main__':
     print('Plot distributions in bystanders vs controls')
     # NOTE: these genes come out of the smallest P-value for 'comp' above
     #genes_diff = ['IFI6', 'IFI44L', 'IFIT3', 'ISG15', 'MX1']
-    # NOTE: make space for panel 4F
-    genes_diff = ['IFI6', 'IFI44L', 'IFIT3']#, 'ISG15']
+
+    # FIG 4G
+    genes_diff = ['IFI6', 'IFI44L', 'IFIT3']
     fig, axs = plt.subplots(
             1, len(genes_diff), sharex=True, sharey=True,
             figsize=(3.6, 2.3))
@@ -166,8 +167,8 @@ if __name__ == '__main__':
     fig.text(0.02, 0.65, 'counts per million', rotation=90, ha='center')
     plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=0)
     t = fig.text(0.01, 0.99, 'F', ha='left', va='top', fontsize=16)
-    fig.savefig('../../figures/fig4F.png')
-    fig.savefig('../../figures/fig4F.svg')
+    fig.savefig('../../figures/fig4G.png')
+    fig.savefig('../../figures/fig4G.svg')
 
     plt.ion()
     plt.show()

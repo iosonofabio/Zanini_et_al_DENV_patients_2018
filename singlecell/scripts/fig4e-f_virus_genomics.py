@@ -145,7 +145,7 @@ if __name__ == '__main__':
             i_min = np.argsort(a)[-2]
             af_min[pos] = 1.0 * a[i_min] / a.sum()
 
-    # FIG 4G
+    # FIG 4E
     print('Plot coverage and allele frequencies')
     x = np.arange(len(ref)) + 1
     fig, ax = plt.subplots(1, 1, figsize=(6.27, 2.1))
@@ -164,11 +164,11 @@ if __name__ == '__main__':
     ax2.set_ylabel('MAF (blue)')
     fig.text(0.01, 0.98, 'G', ha='left', va='top', fontsize=14)
     fig.tight_layout(rect=(0.01, 0, 0.99, 1))
-    fig.savefig('../../figures/fig4G.png')
-    fig.savefig('../../figures/fig4G.svg')
+    fig.savefig('../../figures/fig4E.png')
+    fig.savefig('../../figures/fig4E.svg')
 
     ## Try the same with 3 plots
-    ## FIG 4G
+    ## FIG 4E
     #x = np.arange(len(ref)) + 1
     ##start = 5280
     ##end = 5640
@@ -228,8 +228,8 @@ if __name__ == '__main__':
     #fig.text(0.965, 0.52, 'MAF (blue)', ha='center', va='center', rotation=90)
     #fig.text(0.01, 0.98, 'G', ha='left', va='top', fontsize=14)
     #fig.tight_layout(rect=(0.03, 0, 0.97, 1), w_pad=0.1)
-    ##fig.savefig('../../figures/fig4G.png')
-    ##fig.savefig('../../figures/fig4G.svg')
+    ##fig.savefig('../../figures/fig4E.png')
+    ##fig.savefig('../../figures/fig4E.svg')
 
     print('Load cross-sectional allele frequencies')
     from singlecell.filenames import support_foldername
@@ -285,7 +285,7 @@ if __name__ == '__main__':
     ent_cs_cov = ent_cs_ali[cov_ali >= cov_min]
     ent_pat_cov = ent_pat_ali[cov_ali >= cov_min]
 
-    # FIG 4H
+    # FIG 4F
     print('Scatter entropies')
     from scipy.stats import pearsonr, spearmanr
     r = pearsonr(ent_cs_cov, ent_pat_cov)[0]
@@ -307,8 +307,8 @@ if __name__ == '__main__':
     ax.grid(True)
     fig.text(0.01, 0.98, 'H', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=(0, 0, 1, 0.9))
-    fig.savefig('../../figures/fig4H.png')
-    fig.savefig('../../figures/fig4H.svg')
+    fig.savefig('../../figures/fig4F.png')
+    fig.savefig('../../figures/fig4F.svg')
 
     plt.ion()
     plt.show()

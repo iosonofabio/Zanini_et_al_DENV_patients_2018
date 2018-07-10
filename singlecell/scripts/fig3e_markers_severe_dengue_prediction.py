@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     print('Load data (L1 normalized)')
     ds = Dataset(
-            samplesheet='virus',
+            samplesheet='dengue_patients',
             counts_table='dengue_patients',
             featuresheet='dengue_patients',
             )
