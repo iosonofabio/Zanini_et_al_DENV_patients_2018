@@ -103,15 +103,14 @@ if __name__ == '__main__':
     print('Differential expression between bystanders and controls')
     comp = dsb.compare(dsc)
 
-
     print('Plot distributions in bystanders vs controls')
     # NOTE: these genes come out of the smallest P-value for 'comp' above
     #genes_diff = ['IFI6', 'IFI44L', 'IFIT3', 'ISG15', 'MX1']
     # NOTE: make space for panel 4F
-    genes_diff = ['IFI6', 'IFI44L', 'IFIT3', 'ISG15']
+    genes_diff = ['IFI6', 'IFI44L', 'IFIT3']#, 'ISG15']
     fig, axs = plt.subplots(
             1, len(genes_diff), sharex=True, sharey=True,
-            figsize=(6.0, 2.3))
+            figsize=(3.6, 2.3))
     axs = axs.ravel()
     colors = [sns.color_palette(n_colors=7)[i] for i in [2, 0]]
     for gname, ax in zip(genes_diff, axs):
@@ -160,15 +159,15 @@ if __name__ == '__main__':
     ax.set_ylim(-1.1, 6.3)
     ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
     ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
-    fig.text(0.5, 0.02,
+    fig.text(0.55, 0.08,
              'is the B cell a bystander?',
              ha='center',
              )
     fig.text(0.02, 0.65, 'counts per million', rotation=90, ha='center')
     plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=0)
-    t = fig.text(0.01, 0.99, 'D', ha='left', va='top', fontsize=16)
-    fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig4D.png')
-    fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig4D.svg')
+    t = fig.text(0.01, 0.99, 'F', ha='left', va='top', fontsize=16)
+    fig.savefig('../../figures/fig4F.png')
+    fig.savefig('../../figures/fig4F.svg')
 
     plt.ion()
     plt.show()

@@ -186,7 +186,6 @@ if __name__ == '__main__':
     ax.set_xlim(-0.5, len(ll_subtypes) - 0.5)
     fig.text(0.01, 0.99, 'A', ha='left', va='top', fontsize=16)
     plt.tight_layout()
-
     #fig.savefig('../../figures/fig3A.svg')
     #fig.savefig('../../figures/fig3A.png')
 
@@ -258,8 +257,8 @@ if __name__ == '__main__':
     fig.text(0.01, 0.68, 'C', ha='left', va='top', fontsize=16)
     fig.text(0.01, 0.37, 'D', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.015, 0.04, 1, 1])
-    fig.savefig('../../figures/fig3B-D.svg')
-    fig.savefig('../../figures/fig3B-D.png')
+    #fig.savefig('../../figures/fig3B-D.svg')
+    #fig.savefig('../../figures/fig3B-D.png')
 
     plt.ion()
     plt.show()

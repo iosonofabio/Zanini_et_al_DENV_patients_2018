@@ -79,8 +79,7 @@ def trim_short_cigars(read, min_match_length=25):
     return read
 
 
-def get_allele_counts(expname, ref):
-    fn_bam = experiments_foldername+expname+'/dengue_remapped.bam'
+def get_allele_counts(fn_bam, ref):
     alphal = ['A', 'C', 'G', 'T', '-', 'N']
     alpha = np.array(alphal)
     ac = np.zeros((len(alpha), len(ref)), int)
@@ -130,11 +129,12 @@ if __name__ == '__main__':
     args = pa.parse_args()
 
     print('Get hybrid reference')
-    fn_ref = experiments_foldername+args.experiment+'/dengue_reference_hybrid.fasta'
+    fn_ref = '../../data/dengue_reference_hybrid_{:}.fasta'.format(args.experiment)
     ref = SeqIO.read(fn_ref, 'fasta')
 
     print('Get allele counts')
-    tmp = get_allele_counts(args.experiment, ref)
+    fn_bam = '../../data/dengue_remapped_{:}.bam'.format(args.experiment)
+    tmp = get_allele_counts(fn_bam, ref)
     ac = tmp['allele_counts']
     alpha = tmp['alpha']
 
@@ -145,109 +145,91 @@ if __name__ == '__main__':
             i_min = np.argsort(a)[-2]
             af_min[pos] = 1.0 * a[i_min] / a.sum()
 
-    print('Plot coverage and allele frequencies')
-    if False:
-        x = np.arange(len(ref)) + 1
-        start = 7100
-        end = 7500
-
-        fig, axs = plt.subplots(2, 1, figsize=(8.27, 4.5), sharey=True)
-        ax = axs[0]
-        ax.plot(x, 0.1 + ac.sum(axis=0), lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
-        ax.set_xlim(0, len(ref) + 1)
-        ax.set_ylim(ymin=0.09)
-        ax.set_yscale('log')
-        ax2 = ax.twinx()
-        ax2.plot(x, af_min, lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
-        ax2.set_xlim(0, len(ref) + 1)
-        ax2.set_ylim(0.009, 1.1)
-        ax2.set_yscale('log')
-        ax2.plot([start] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
-        ax2.plot([end] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
-
-        ax = axs[1]
-        ax.plot(x[start: end], 0.1 + ac.sum(axis=0)[start: end], lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
-        ax.set_xlim(start, end + 1)
-        ax.set_ylim(ymin=0.09)
-        ax.set_yscale('log')
-        ax2 = ax.twinx()
-        ax2.plot(x[start: end], af_min[start: end], lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
-        ax.set_xlim(start, end + 1)
-        ax2.set_ylim(0.009, 1.1)
-        ax2.set_yscale('log')
-
-        fig.text(0.03, 0.52, 'Coverage (red)', ha='center', va='center', rotation=90)
-        fig.text(0.965, 0.52, 'MAF (blue)', ha='center', va='center', rotation=90)
-        fig.text(0.01, 0.98, 'D', ha='left', va='top', fontsize=14)
-        fig.tight_layout(rect=(0.03, 0, 0.97, 1))
-        #fig.savefig('../../figures/dengue_allele_frequencies_10017022.png')
-        #fig.savefig('../../figures/dengue_allele_frequencies_10017022.svg')
-
-    # Try the same with 3 plots
     # FIG 4G
+    print('Plot coverage and allele frequencies')
     x = np.arange(len(ref)) + 1
-    #start = 5280
-    #end = 5640
-    start = 7100
-    end = 7500
-    start2 = 10200
-    end2 = 10600
-
-    from matplotlib import gridspec
-    fig = plt.figure(figsize=(8.27, 4.5))
-    gs = gridspec.GridSpec(2, 2)
-    axs = [fig.add_subplot(gs[0, :])]
-    axs.append(fig.add_subplot(gs[2], sharey=axs[0]))
-    axs.append(fig.add_subplot(gs[3], sharey=axs[0]))
-
-    ax = axs[0]
+    fig, ax = plt.subplots(1, 1, figsize=(6.27, 2.1))
     ax.plot(x, 0.1 + ac.sum(axis=0), lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
     ax.set_xlim(0, len(ref) + 1)
     ax.set_ylim(ymin=0.09)
     ax.set_yscale('log')
+    ax.set_xlabel('Position in DENV genome')
     ax2 = ax.twinx()
     ax2.plot(x, af_min, lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
     ax2.set_xlim(0, len(ref) + 1)
     ax2.set_ylim(0.009, 1.1)
     ax2.set_yscale('log')
-    ax2.plot([start] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
-    ax2.plot([end] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
-    ax2.plot([start2] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
-    ax2.plot([end2] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
 
-    ax = axs[1]
-    ax.plot(x[start: end], 0.1 + ac.sum(axis=0)[start: end], lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
-    ax.set_xlim(start, end + 1)
-    ax.set_ylim(ymin=0.09)
-    ax.set_yscale('log')
-    ax2 = ax.twinx()
-    ax2.plot(x[start: end], af_min[start: end], lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
-    ax.set_xlim(start, end + 1)
-    ax2.set_ylim(0.009, 1.1)
-    ax2.set_yscale('log')
-
-    plt.setp(ax2.get_yticklabels(), visible=False)
-
-    ax = axs[2]
-    ax.plot(x[start2: end2], 0.1 + ac.sum(axis=0)[start2: end2], lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
-    ax.set_xlim(start, end + 1)
-    ax.set_ylim(ymin=0.09)
-    ax.set_yscale('log')
-    ax2 = ax.twinx()
-    ax2.plot(x[start2: end2], af_min[start2: end2], lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
-    ax.set_xlim(start2, end2 + 1)
-    ax2.set_ylim(0.009, 1.1)
-    ax2.set_yscale('log')
-    plt.setp(axs[2].get_yticklabels(), visible=False)
-
-    fig.text(0.03, 0.52, 'Coverage (red)', ha='center', va='center', rotation=90)
-    fig.text(0.965, 0.52, 'MAF (blue)', ha='center', va='center', rotation=90)
+    ax.set_ylabel('Coverage (red)')
+    ax2.set_ylabel('MAF (blue)')
     fig.text(0.01, 0.98, 'G', ha='left', va='top', fontsize=14)
-    fig.tight_layout(rect=(0.03, 0, 0.97, 1), w_pad=0.1)
-    #fig.savefig('../../figures/dengue_allele_frequencies_10017022.png')
-    #fig.savefig('../../figures/dengue_allele_frequencies_10017022.svg')
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig4E.png')
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig4E.svg')
+    fig.tight_layout(rect=(0.01, 0, 0.99, 1))
+    fig.savefig('../../figures/fig4G.png')
+    fig.savefig('../../figures/fig4G.svg')
+
+    ## Try the same with 3 plots
+    ## FIG 4G
+    #x = np.arange(len(ref)) + 1
+    ##start = 5280
+    ##end = 5640
+    #start = 7100
+    #end = 7500
+    #start2 = 10200
+    #end2 = 10600
+
+    #from matplotlib import gridspec
+    #fig = plt.figure(figsize=(8.27, 4.5))
+    #gs = gridspec.GridSpec(2, 2)
+    #axs = [fig.add_subplot(gs[0, :])]
+    #axs.append(fig.add_subplot(gs[2], sharey=axs[0]))
+    #axs.append(fig.add_subplot(gs[3], sharey=axs[0]))
+
+    #ax = axs[0]
+    #ax.plot(x, 0.1 + ac.sum(axis=0), lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
+    #ax.set_xlim(0, len(ref) + 1)
+    #ax.set_ylim(ymin=0.09)
+    #ax.set_yscale('log')
+    #ax2 = ax.twinx()
+    #ax2.plot(x, af_min, lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
+    #ax2.set_xlim(0, len(ref) + 1)
+    #ax2.set_ylim(0.009, 1.1)
+    #ax2.set_yscale('log')
+    #ax2.plot([start] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
+    #ax2.plot([end] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
+    #ax2.plot([start2] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
+    #ax2.plot([end2] * 2, [1e-3, 1.1], lw=1.5, color='k', zorder=8)
+
+    #ax = axs[1]
+    #ax.plot(x[start: end], 0.1 + ac.sum(axis=0)[start: end], lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
+    #ax.set_xlim(start, end + 1)
+    #ax.set_ylim(ymin=0.09)
+    #ax.set_yscale('log')
+    #ax2 = ax.twinx()
+    #ax2.plot(x[start: end], af_min[start: end], lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
+    #ax.set_xlim(start, end + 1)
+    #ax2.set_ylim(0.009, 1.1)
+    #ax2.set_yscale('log')
+
+    #plt.setp(ax2.get_yticklabels(), visible=False)
+
+    #ax = axs[2]
+    #ax.plot(x[start2: end2], 0.1 + ac.sum(axis=0)[start2: end2], lw=2, color='darkred', label='Coverage', zorder=5, alpha=0.7)
+    #ax.set_xlim(start, end + 1)
+    #ax.set_ylim(ymin=0.09)
+    #ax.set_yscale('log')
+    #ax2 = ax.twinx()
+    #ax2.plot(x[start2: end2], af_min[start2: end2], lw=2, color='steelblue', label='Minor allele frequency', zorder=4, alpha=0.6)
+    #ax.set_xlim(start2, end2 + 1)
+    #ax2.set_ylim(0.009, 1.1)
+    #ax2.set_yscale('log')
+    #plt.setp(axs[2].get_yticklabels(), visible=False)
+
+    #fig.text(0.03, 0.52, 'Coverage (red)', ha='center', va='center', rotation=90)
+    #fig.text(0.965, 0.52, 'MAF (blue)', ha='center', va='center', rotation=90)
+    #fig.text(0.01, 0.98, 'G', ha='left', va='top', fontsize=14)
+    #fig.tight_layout(rect=(0.03, 0, 0.97, 1), w_pad=0.1)
+    ##fig.savefig('../../figures/fig4G.png')
+    ##fig.savefig('../../figures/fig4G.svg')
 
     print('Load cross-sectional allele frequencies')
     from singlecell.filenames import support_foldername
@@ -266,11 +248,11 @@ if __name__ == '__main__':
     score, ali1, ali2 = align_overlap(ref, cons_nogaps, score_gapopen=-20)
     ali_fn = support_foldername+'sequencing/experiments/{:}/ali_to_consensus_nongap.fasta'.format(
             args.experiment)
-    with open(ali_fn, 'wt') as f:
-        f.write('> hybridReference_{:}\n'.format(args.experiment))
-        f.write(ali1+'\n')
-        f.write('> serotypeConsNoGaps\n')
-        f.write(ali2+'\n')
+    #with open(ali_fn, 'wt') as f:
+    #    f.write('> hybridReference_{:}\n'.format(args.experiment))
+    #    f.write(ali1+'\n')
+    #    f.write('> serotypeConsNoGaps\n')
+    #    f.write(ali2+'\n')
 
     # No gaps in the largest region 89: 10280
     # NOTE: annotate the UTRs
@@ -303,18 +285,18 @@ if __name__ == '__main__':
     ent_cs_cov = ent_cs_ali[cov_ali >= cov_min]
     ent_pat_cov = ent_pat_ali[cov_ali >= cov_min]
 
-    print('Scatter entropies')
     # FIG 4H
+    print('Scatter entropies')
     from scipy.stats import pearsonr, spearmanr
     r = pearsonr(ent_cs_cov, ent_pat_cov)[0]
 
-    fig, ax = plt.subplots(figsize=(2.3, 2.5))
+    fig, ax = plt.subplots(figsize=(2, 2.1))
     ax.scatter(
             ent_cs_cov, ent_pat_cov, s=20, alpha=0.5,
             label='$r={:.2f}$'.format(r),
             )
-    ax.set_xlabel('Serotype entropy [bits]')
-    ax.set_ylabel('Patient entropy [bits]')
+    ax.set_xlabel('Serotype entropy [bits]', fontsize=9)
+    ax.set_ylabel('Patient entropy [bits]', fontsize=9)
     ax.set_xlim(xmin=1e-2)
     ax.set_ylim(ymin=1e-2)
     ax.set_xscale('log')
@@ -325,18 +307,8 @@ if __name__ == '__main__':
     ax.grid(True)
     fig.text(0.01, 0.98, 'H', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=(0, 0, 1, 0.9))
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig4F.png')
-    #fig.savefig('../../../papers/dengue_patients/draft_20180527/figures/fig4F.svg')
-
-    print('Get allele counts for both patients')
-    for expname in ('10017016', '10017022'):
-        fn_ref = experiments_foldername+expname+'/dengue_reference_hybrid.fasta'
-        ref = SeqIO.read(fn_ref, 'fasta')
-
-        print('Get allele counts')
-        tmp = get_allele_counts(args.experiment, ref)
-        ac = tmp['allele_counts']
-
+    fig.savefig('../../figures/fig4H.png')
+    fig.savefig('../../figures/fig4H.svg')
 
     plt.ion()
     plt.show()

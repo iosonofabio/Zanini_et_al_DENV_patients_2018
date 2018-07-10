@@ -152,8 +152,8 @@ if __name__ == '__main__':
         ax.plot([yt] * 2, [-1, 8], lw=1, color='grey', alpha=0.5, zorder=0.5)
     fig.text(0.01, 0.98, 'A', ha='left', va='top', fontsize=14)
     plt.tight_layout(w_pad=0.1)
-    fig.savefig('../../figures/fig4A.svg')
-    fig.savefig('../../figures/fig4A.png')
+    #fig.savefig('../../figures/fig4A.svg')
+    #fig.savefig('../../figures/fig4A.png')
 
     # FIG 4B
     print('Differential expression in infected B cells, selected genes')
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     genes = ['IGHM', 'IGHD', 'TCL1A', 'CXCR4', 'CD69', 'IRF1', 'FCRL1', 'TXNIP']
     dsbp = dsb.query_samples_by_metadata('infected != "ambiguous"')
     from matplotlib.patches import Rectangle
-    fig, axs = plt.subplots(2, 4, sharex=True, sharey=True, figsize=(6.3, 4.5))
+    fig, axs = plt.subplots(2, 4, sharex=True, sharey=True, figsize=(6.3, 4))
     axs = axs.ravel()
     for gname, ax in zip(genes, axs):
         dfi = comp.loc[gname]
@@ -219,7 +219,7 @@ if __name__ == '__main__':
              )
     fig.text(0.027, 0.63, 'counts per million', rotation=90, ha='center')
     fig.text(0.01, 0.98, 'B', ha='left', va='top', fontsize=14)
-    plt.tight_layout(rect=(0.03, 0.03, 1, 1))
+    plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=1.2)
     fig.savefig('../../figures/fig4B.svg')
     fig.savefig('../../figures/fig4B.png')
 
@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
     vs = dsdr.dimensionality.tsne(transform=None, perplexity=20)
 
-    fig, axs = plt.subplots(6, 1, figsize=(2, 9.5), sharex=True, sharey=True)
+    fig, axs = plt.subplots(6, 1, figsize=(2, 6.8), sharex=True, sharey=True)
     axs = axs.ravel()
     x = vs.iloc[:, 0]
     y = vs.iloc[:, 1]
@@ -314,15 +314,15 @@ if __name__ == '__main__':
     ax.set_xlabel('dimension 1')
     ax.set_ylabel('dimension 2')
     fig.text(0.01, 0.98, 'C', ha='left', va='top', fontsize=14)
-    plt.tight_layout(rect=[-0.15, 0.04, 1, 1])
-    ax = fig.add_axes([0.15, 0.07, 0.7, 0.015])
+    plt.tight_layout(rect=[-0.15, 0.06, 1, 1])
+    ax = fig.add_axes([0.15, 0.09, 0.7, 0.015])
     norm = mpl.colors.Normalize(vmin=0, vmax=1)
     cb = mpl.colorbar.ColorbarBase(
         ax=ax, cmap='viridis', norm=norm,
         orientation="horizontal")
     cb.set_label('Gene/virus expression\n(relative to highest cell)')
-    #fig.savefig('../../figures/fig4C.svg')
-    #fig.savefig('../../figures/fig4C.png')
+    fig.savefig('../../figures/fig4C.svg')
+    fig.savefig('../../figures/fig4C.png')
 
     # SUPPLEMENTARY FIG 5
     print('Plot many more genes, no good for paper')
