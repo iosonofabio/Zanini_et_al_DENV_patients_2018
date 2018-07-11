@@ -91,7 +91,7 @@ if __name__ == '__main__':
     genes_good &= ~ds.featurenames.str.startswith('RP11')
     ds.counts = ds.counts.loc[genes_good]
 
-    # FIG 2A-F
+    # FIG 2A-B
     layout_name = 'lgl'
     k = 5
     k_slice = 6
@@ -130,12 +130,12 @@ if __name__ == '__main__':
             ('GZMA', 'GZMA'),
             ('MS4A1', 'CD20'),
             ('CD14', 'CD14'),
-            ('log_virus_reads_per_million', 'virus abundance'),
+            ('log_virus_reads_per_million', 'Virus'),
             ]
     cmap = 'viridis'
     x = layout_df.values[:, 0]
     y = layout_df.values[:, 1]
-    fig, axs = plt.subplots(2, 3, figsize=(7, 8))
+    fig, axs = plt.subplots(2, 3, figsize=(6, 4))
     axs = axs.ravel()
     for ig, ((gname, glabel), ax) in enumerate(zip(genes_plot, axs)):
         if gname in ds.counts.index:
@@ -159,20 +159,20 @@ if __name__ == '__main__':
 
         ax.set_title(glabel)
         ax.set_axis_off()
-        ax.text(0.01, 0.98, chr(65 + ig),
-                transform=ax.transAxes,
-                ha='left',
-                va='top',
-                fontsize=14)
 
-    ax = fig.add_axes([0.09, 0.348, 0.88, 0.02])
+    fig.text(0.01, 0.98, 'A',
+            ha='left',
+            va='top',
+            fontsize=14)
+
+    plt.tight_layout(rect=[-0.05, 0.3, 0.8, 1], h_pad=0.2, w_pad=0.1)
+    ax = fig.add_axes([0.85, 0.35, 0.02, 0.6])
     norm = mpl.colors.Normalize(vmin=0, vmax=1)
     cb = mpl.colorbar.ColorbarBase(
         ax=ax, cmap=cmap, norm=norm,
-        orientation="horizontal")
-    cb.set_label('Gene/virus expression relative to highest expressing cell')
+        orientation="vertical")
+    cb.set_label('Gene/virus expression\n(relative to highest cell)')
 
-    # FIG 2G
     print('Plot number of cells for each cell type in various patients')
     n_cell_types = ds.samplesheet.groupby(['experiment', 'cellType']).size().unstack().fillna(0).stack().to_frame()
     n_cell_types.columns = ['n']
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     n_cell_types['cellType'] = n_cell_types.index.get_level_values(1)
     n_cell_types_plot = n_cell_types.copy()
     n_cell_types_plot['n'] += 0.1
-    ax = fig.add_axes([0.16, 0.07, 0.81, 0.18])
+    ax = fig.add_axes([0.16, 0.07, 0.75, 0.18])
     sns.swarmplot(
             data=n_cell_types_plot,
             y='n',
@@ -188,22 +188,21 @@ if __name__ == '__main__':
             order=['T cell', 'NK cell', 'NKT cell', 'B cell', 'monocyte', 'cDC', 'pDC'],
             ax=ax,
             )
-    ax.set_ylabel('number of cells')
+    ax.set_ylabel('number\nof cells')
     ax.set_ylim(0.09, 1100)
     ax.set_yscale('log')
     ax.grid(True, axis='y')
-    ax.set_xlabel('cell type')
+    ax.set_xlabel('')
     ax.set_yticks([0.1, 1, 10, 100, 1000])
     ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$'])
-    fig.text(0.085, 0.275, chr(65 + ig + 1),
-            transform=fig.transFigure,
-            ha='left',
-            va='top',
-            fontsize=14)
 
-    plt.tight_layout(rect=(0, 0.34, 1, 1), w_pad=0.1, h_pad=0.1)
-    #fig.savefig('../../figures/fig2A-G.png')
-    #fig.savefig('../../figures/fig2A-G.svg')
+    fig.text(0.01, 0.3, 'B',
+             ha='left',
+             va='top',
+             fontsize=14)
+
+    fig.savefig('../../figures/fig2A-B.png')
+    fig.savefig('../../figures/fig2A-B.svg')
 
     # SUPPLEMENTARY FIG 10
     print('T cells')
@@ -286,8 +285,8 @@ if __name__ == '__main__':
         orientation="vertical")
     cb.set_label('relative expression')
 
-    fig.savefig('../../figures/supplementary_fig10.svg')
-    fig.savefig('../../figures/supplementary_fig10.png')
+    #fig.savefig('../../figures/supplementary_fig10.svg')
+    #fig.savefig('../../figures/supplementary_fig10.png')
 
     # SUPPLEMENTARY FIG 11
     print('NK cells')
@@ -362,8 +361,8 @@ if __name__ == '__main__':
         orientation="vertical")
     cb.set_label('relative expression')
 
-    fig.savefig('../../figures/supplementary_fig11.svg')
-    fig.savefig('../../figures/supplementary_fig11.png')
+    #fig.savefig('../../figures/supplementary_fig11.svg')
+    #fig.savefig('../../figures/supplementary_fig11.png')
 
     # SUPPLEMENTARY FIG 12
     print('B cells')
@@ -434,8 +433,8 @@ if __name__ == '__main__':
         orientation="vertical")
     cb.set_label('relative expression')
 
-    fig.savefig('../../figures/supplementary_fig12.svg')
-    fig.savefig('../../figures/supplementary_fig12.png')
+    #fig.savefig('../../figures/supplementary_fig12.svg')
+    #fig.savefig('../../figures/supplementary_fig12.png')
 
     # SUPPLEMENTARY FIG 13
     print('Monocytes')
@@ -513,8 +512,8 @@ if __name__ == '__main__':
         orientation="vertical")
     cb.set_label('relative expression')
 
-    fig.savefig('../../figures/supplementary_fig13.svg')
-    fig.savefig('../../figures/supplementary_fig13.png')
+    #fig.savefig('../../figures/supplementary_fig13.svg')
+    #fig.savefig('../../figures/supplementary_fig13.png')
 
     # FIG 2H
     print('All subtype tSNEs together')
