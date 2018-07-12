@@ -220,8 +220,8 @@ if __name__ == '__main__':
     fig.text(0.027, 0.68, 'counts per million', rotation=90, ha='center')
     fig.text(0.01, 0.98, 'B', ha='left', va='top', fontsize=14)
     plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=1.2)
-    fig.savefig('../../figures/fig4B.svg')
-    fig.savefig('../../figures/fig4B.png')
+    #fig.savefig('../../figures/fig4B.svg')
+    #fig.savefig('../../figures/fig4B.png')
 
     # FIG 4C
     print('Plot dimensionality reduction on B cell maturation genes')
@@ -321,9 +321,9 @@ if __name__ == '__main__':
     cb = mpl.colorbar.ColorbarBase(
         ax=ax, cmap='viridis', norm=norm,
         orientation="vertical")
-    cb.set_label('Gene/virus expression\n(relative to highest cell)')
-    fig.savefig('../../figures/fig4C.svg')
-    fig.savefig('../../figures/fig4C.png')
+    cb.set_label('Gene or virus expression\n(relative to highest cell)')
+    #fig.savefig('../../figures/fig4C.svg')
+    #fig.savefig('../../figures/fig4C.png')
 
     # SUPPLEMENTARY FIG 5
     print('Plot many more genes, no good for paper')

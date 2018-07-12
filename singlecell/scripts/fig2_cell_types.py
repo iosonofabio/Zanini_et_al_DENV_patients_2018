@@ -171,7 +171,7 @@ if __name__ == '__main__':
     cb = mpl.colorbar.ColorbarBase(
         ax=ax, cmap=cmap, norm=norm,
         orientation="vertical")
-    cb.set_label('Gene/virus expression\n(relative to highest cell)')
+    cb.set_label('Gene or virus expression\n(relative to highest cell)')
 
     print('Plot number of cells for each cell type in various patients')
     n_cell_types = ds.samplesheet.groupby(['experiment', 'cellType']).size().unstack().fillna(0).stack().to_frame()
@@ -201,8 +201,8 @@ if __name__ == '__main__':
              va='top',
              fontsize=14)
 
-    fig.savefig('../../figures/fig2A-B.png')
-    fig.savefig('../../figures/fig2A-B.svg')
+    #fig.savefig('../../figures/fig2A-B.png')
+    #fig.savefig('../../figures/fig2A-B.svg')
 
     # SUPPLEMENTARY FIG 10
     print('T cells')
@@ -284,9 +284,8 @@ if __name__ == '__main__':
         ax=ax, cmap=cmap, norm=norm,
         orientation="vertical")
     cb.set_label('relative expression')
-
-    #fig.savefig('../../figures/supplementary_fig10.svg')
-    #fig.savefig('../../figures/supplementary_fig10.png')
+    fig.savefig('../../figures/supplementary_fig10.svg')
+    fig.savefig('../../figures/supplementary_fig10.png')
 
     # SUPPLEMENTARY FIG 11
     print('NK cells')
@@ -360,9 +359,8 @@ if __name__ == '__main__':
         ax=ax, cmap=cmap, norm=norm,
         orientation="vertical")
     cb.set_label('relative expression')
-
-    #fig.savefig('../../figures/supplementary_fig11.svg')
-    #fig.savefig('../../figures/supplementary_fig11.png')
+    fig.savefig('../../figures/supplementary_fig11.svg')
+    fig.savefig('../../figures/supplementary_fig11.png')
 
     # SUPPLEMENTARY FIG 12
     print('B cells')
@@ -432,9 +430,8 @@ if __name__ == '__main__':
         ax=ax, cmap=cmap, norm=norm,
         orientation="vertical")
     cb.set_label('relative expression')
-
-    #fig.savefig('../../figures/supplementary_fig12.svg')
-    #fig.savefig('../../figures/supplementary_fig12.png')
+    fig.savefig('../../figures/supplementary_fig12.svg')
+    fig.savefig('../../figures/supplementary_fig12.png')
 
     # SUPPLEMENTARY FIG 13
     print('Monocytes')
@@ -511,9 +508,8 @@ if __name__ == '__main__':
         ax=ax, cmap=cmap, norm=norm,
         orientation="vertical")
     cb.set_label('relative expression')
-
-    #fig.savefig('../../figures/supplementary_fig13.svg')
-    #fig.savefig('../../figures/supplementary_fig13.png')
+    fig.savefig('../../figures/supplementary_fig13.svg')
+    fig.savefig('../../figures/supplementary_fig13.png')
 
     # FIG 2H
     print('All subtype tSNEs together')
