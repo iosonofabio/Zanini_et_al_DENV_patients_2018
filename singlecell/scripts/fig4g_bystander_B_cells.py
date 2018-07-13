@@ -160,13 +160,15 @@ if __name__ == '__main__':
     ax.set_ylim(-1.1, 6.3)
     ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
     ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
-    fig.text(0.55, 0.08,
-             'is the B cell a bystander?',
+    fig.text(0.55, 0.13,
+             'is the B cell a bystander from a\npatient with DENV-associated cells?',
              ha='center',
+             va='top',
+             fontsize=10,
              )
     fig.text(0.02, 0.65, 'counts per million', rotation=90, ha='center')
-    plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=0)
-    t = fig.text(0.01, 0.99, 'F', ha='left', va='top', fontsize=16)
+    plt.tight_layout(rect=(0.03, 0.08, 1, 1), w_pad=0)
+    t = fig.text(0.01, 0.99, 'G', ha='left', va='top', fontsize=16)
     fig.savefig('../../figures/fig4G.png')
     fig.savefig('../../figures/fig4G.svg')
 
