@@ -117,9 +117,9 @@ if __name__ == '__main__':
     for gname, ax in zip(genes_diff, axs):
         dfi = comp.loc[gname]
         datab = np.log10(0.1 + dsb.counts.loc[[gname]].T)
-        datab['is_bystander'] = 'yes'
+        datab['is_bystander'] = 'B'
         datac = np.log10(0.1 + dsc.counts.loc[[gname]].T)
-        datac['is_bystander'] = 'no'
+        datac['is_bystander'] = 'H'
         data = pd.concat([datab, datac], axis=0)
         with sns.axes_style('whitegrid'):
             sns.violinplot(
@@ -128,7 +128,7 @@ if __name__ == '__main__':
                     y=gname,
                     inner='quartile',
                     ax=ax,
-                    order=['no', 'yes'],
+                    order=['H', 'B'],
                     zorder=10,
                     scale='width',
                     palette=colors,
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                     x='is_bystander',
                     y=gname,
                     ax=ax,
-                    order=['no', 'yes'],
+                    order=['H', 'B'],
                     zorder=10,
                     s=1.5,
                     alpha=1.0,
@@ -161,12 +161,12 @@ if __name__ == '__main__':
     ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
     ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
     fig.text(0.55, 0.13,
-             'is the B cell a bystander from a\npatient with DENV-associated cells?',
+             'Healthy (H) or bystander (B)?',
              ha='center',
              va='top',
              fontsize=10,
              )
-    fig.text(0.02, 0.65, 'counts per million', rotation=90, ha='center')
+    fig.text(0.025, 0.75, 'counts per million', rotation=90, ha='center')
     plt.tight_layout(rect=(0.03, 0.08, 1, 1), w_pad=0)
     t = fig.text(0.01, 0.99, 'G', ha='left', va='top', fontsize=16)
     fig.savefig('../../figures/fig4G.png')
