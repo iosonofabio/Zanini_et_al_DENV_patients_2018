@@ -93,46 +93,53 @@ if __name__ == '__main__':
     ds.counts = ds.counts.loc[genes_good]
 
     # FIG 2A-B
-    layout_name = 'lgl'
-    k = 5
-    k_slice = 6
-    k_threshold = 0.2
-    graph_layout_fn = '../../data/fig2_graph_layout_{:}_k{:}_slice{:}_threshold{:.2f}.tsv'.format(
-            layout_name,
-            k, k_slice, k_threshold)
-    if (not os.path.isfile(graph_layout_fn)) or args.regenerate_layout:
-        print('Make knn graph')
-        knn = ds.graph.lshknn(axis='samples', n_neighbors=k, slice_length=k_slice, threshold=k_threshold)
-        edges = list(zip(knn.row, knn.col))
-        G = ig.Graph(edges=edges, edge_attrs={'weight': knn.data})
+    #layout_name = 'lgl'
+    #k = 5
+    #k_slice = 6
+    #k_threshold = 0.2
+    #graph_layout_fn = '../../data/fig2_graph_layout_{:}_k{:}_slice{:}_threshold{:.2f}.tsv'.format(
+    #        layout_name,
+    #        k, k_slice, k_threshold)
+    #if (not os.path.isfile(graph_layout_fn)) or args.regenerate_layout:
+    #    print('Make knn graph')
+    #    knn = ds.graph.lshknn(axis='samples', n_neighbors=k, slice_length=k_slice, threshold=k_threshold)
+    #    edges = list(zip(knn.row, knn.col))
+    #    G = ig.Graph(edges=edges, edge_attrs={'weight': knn.data})
 
-        print('Get graph layout')
-        if layout_name == 'lgl':
-            layout = G.layout_lgl(maxiter=500)
-        elif layout_name == 'fr':
-            layout = G.layout_fruchterman_reingold(maxiter=500)
-        else:
-            raise ValueError('Graph layout name not implemented: {:}'.format(layout_name))
-        layout_df = pd.DataFrame(
-                data=np.array(layout),
-                index=ds.samplenames,
-                columns=['dim1', 'dim2'],
-                )
-        layout_df.to_csv(graph_layout_fn, sep='\t', index=True)
+    #    print('Get graph layout')
+    #    if layout_name == 'lgl':
+    #        layout = G.layout_lgl(maxiter=500)
+    #    elif layout_name == 'fr':
+    #        layout = G.layout_fruchterman_reingold(maxiter=500)
+    #    else:
+    #        raise ValueError('Graph layout name not implemented: {:}'.format(layout_name))
+    #    layout_df = pd.DataFrame(
+    #            data=np.array(layout),
+    #            index=ds.samplenames,
+    #            columns=['dim1', 'dim2'],
+    #            )
+    #    layout_df.to_csv(graph_layout_fn, sep='\t', index=True)
 
-    else:
-        print('Load existing layout')
-        layout_df = pd.read_csv(graph_layout_fn, sep='\t', index_col=0)
+    #else:
+    #    print('Load existing layout')
+    #    layout_df = pd.read_csv(graph_layout_fn, sep='\t', index_col=0)
 
-    print('Plot graph layout')
+    print('Load existing tsne layout')
+    tsne_layout_fn = '../../data/tsne_fig2a_500vargenes_5pcs_perplexity10.csv'
+    layout_df = pd.read_csv(tsne_layout_fn, sep=',', index_col=0)
+
+    print('Plot 2D layout')
     genes_plot = [
             ('PTPRC', 'CD45'),
-            ('TRAC', 'TRAC'),
-            ('GZMA', 'GZMA'),
-            ('MS4A1', 'CD20'),
+            ('CD2', 'CD2'),
+            #('TRAC', 'TRAC'),
+            #('GZMA', 'GZMA'),
             ('CD14', 'CD14'),
-            ('IGHM', 'IGHM'),
+            #('IGHM', 'IGHM'),
+            ('FCGR3A', 'CD16'),
+            ('PTPRS', 'PTPRS'),
             ('IGHG1', 'IGHG1'),
+            ('MS4A1', 'CD20'),
             ('log_virus_reads_per_million', 'Virus'),
             ]
     cmap = 'viridis'
@@ -156,7 +163,7 @@ if __name__ == '__main__':
             ind = (v >= bmin) & (v < bmax)
             ax.scatter(
                     x[ind], y[ind], c=c[ind],
-                    s=20, alpha=0.1 + (0.02 + 0.04 * ('virus' in gname)) * ib,
+                    s=10, alpha=0.1 + (0.02 + 0.04 * ('virus' in gname)) * ib,
                     zorder=5 + ib,
                     )
 
@@ -207,7 +214,11 @@ if __name__ == '__main__':
     fig.savefig('../../figures/fig2A-B.png', dpi=600)
     fig.savefig('../../figures/fig2A-B.svg')
 
-    # SUPPLEMENTARY FIG 10
+    #FIXME
+    plt.ion()
+    plt.show()
+    sys.exit()
+
     print('T cells')
     dsT = ds.query_samples_by_metadata('cellType == "T cell"')
     markers_T = [
@@ -290,7 +301,6 @@ if __name__ == '__main__':
     fig.savefig('../../figures/supplementary_fig10.svg')
     fig.savefig('../../figures/supplementary_fig10.png')
 
-    # SUPPLEMENTARY FIG 11
     print('NK cells')
     dsNK = ds.query_samples_by_metadata('cellType == "NK cell"')
     markers_NK = [
@@ -365,7 +375,6 @@ if __name__ == '__main__':
     fig.savefig('../../figures/supplementary_fig11.svg')
     fig.savefig('../../figures/supplementary_fig11.png')
 
-    # SUPPLEMENTARY FIG 12
     print('B cells')
     dsB = ds.query_samples_by_metadata('cellType == "B cell"')
     markers_B = [
@@ -436,7 +445,6 @@ if __name__ == '__main__':
     fig.savefig('../../figures/supplementary_fig12.svg')
     fig.savefig('../../figures/supplementary_fig12.png')
 
-    # SUPPLEMENTARY FIG 13
     print('Monocytes')
     dsM = ds.query_samples_by_metadata('cellType == "monocyte"')
     markers_M = [
