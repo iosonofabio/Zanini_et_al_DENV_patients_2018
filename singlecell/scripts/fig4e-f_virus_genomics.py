@@ -229,8 +229,8 @@ if __name__ == '__main__':
     ax2.set_ylabel('MAF (blue)')
     fig.text(0.01, 0.98, 'E', ha='left', va='top', fontsize=14)
     fig.tight_layout(rect=(0.01, 0, 0.99, 1))
-    fig.savefig('../../figures/fig4E.png')
-    fig.savefig('../../figures/fig4E.svg')
+    #fig.savefig('../../figures/fig4E.png')
+    #fig.savefig('../../figures/fig4E.svg')
 
     print('Get cross-sectional allele frequencies')
     from singlecell.filenames import support_foldername
@@ -342,8 +342,8 @@ if __name__ == '__main__':
     ax.grid(True)
     fig.text(0.01, 0.98, 'F', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=(0, 0, 1, 0.9))
-    fig.savefig('../../figures/fig4F.png')
-    fig.savefig('../../figures/fig4F.svg')
+    #fig.savefig('../../figures/fig4F.png')
+    #fig.savefig('../../figures/fig4F.svg')
 
     plt.ion()
     plt.show()

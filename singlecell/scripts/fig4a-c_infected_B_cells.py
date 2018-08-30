@@ -52,6 +52,8 @@ if __name__ == '__main__':
     print('Ignore X/Y-linked, HLA types and TCR and BCR variable regions')
     # Keep only autosomal genes
     genes_good = ds.featuresheet['Chromosome/scaffold name'].isin([str(i+1) for i in range(23)])
+    # Add back CD123 which is on X
+    genes_good['IL3RA'] = True
     # Discard HLA
     #genes_good &= ~ds.featurenames.str.startswith('HLA')
     genes_good &= ~ds.featurenames.str.startswith('HLA-A')
@@ -110,11 +112,11 @@ if __name__ == '__main__':
             bbox={'edgecolor': colors[iy], 'facecolor': 'white', 'alpha': 0.7, 'lw': 2, 'pad': 2},
             )
     ax.set_ylabel('')
-    ax.set_xlim(0, 0.57)
+    ax.set_xlim(0, 0.65)
     ax.grid(True)
-    ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
-    ax.set_xticklabels(['0', '10',  '20', '30', '40', '50'])
-    ax.set_xlabel('% cells associated with DENV'.format(nvr))
+    ax.set_xticks([0, 0.2, 0.4, 0.6])
+    ax.set_xticklabels(['0', '20', '40', '60'])
+    ax.set_xlabel('% cells with DENV RNA'.format(nvr))
     ax.set_ylim(6.5, -0.5)
 
     ax = axs[1]
@@ -152,8 +154,8 @@ if __name__ == '__main__':
         ax.plot([yt] * 2, [-1, 8], lw=1, color='grey', alpha=0.5, zorder=0.5)
     fig.text(0.01, 0.98, 'A', ha='left', va='top', fontsize=14)
     plt.tight_layout(w_pad=0.1, h_pad=0)
-    #fig.savefig('../../figures/fig4A.svg')
-    #fig.savefig('../../figures/fig4A.png')
+    fig.savefig('../../figures/fig4A.svg')
+    fig.savefig('../../figures/fig4A.png', dpi=600)
 
     # FIG 4B
     print('Differential expression in infected B cells, selected genes')
@@ -214,14 +216,14 @@ if __name__ == '__main__':
     ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
     ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
     fig.text(0.5, 0.02,
-             'is the cell associated with DENV?'.format(nvr),
+             'is the cell containing DENV RNA?'.format(nvr),
              ha='center',
              )
     fig.text(0.027, 0.68, 'counts per million', rotation=90, ha='center')
     fig.text(0.01, 0.98, 'B', ha='left', va='top', fontsize=14)
     plt.tight_layout(rect=(0.03, 0.03, 1, 1), w_pad=1.2)
     #fig.savefig('../../figures/fig4B.svg')
-    #fig.savefig('../../figures/fig4B.png')
+    #fig.savefig('../../figures/fig4B.png', dpi=600)
 
     # FIG 4C
     print('Plot dimensionality reduction on B cell maturation genes')
@@ -274,10 +276,10 @@ if __name__ == '__main__':
     feas_plot = [
             'log_virus_reads_per_million',
             'MS4A1',
+            'TCL1A',
             'JCHAIN',
             'IGHM',
-            'TCL1A',
-            'TYROBP',
+            'IGHG1',
             ]
     for ax, gname in zip(axs, feas_plot):
         if gname in dsdr.counts.index:
@@ -322,8 +324,8 @@ if __name__ == '__main__':
         ax=ax, cmap='viridis', norm=norm,
         orientation="vertical")
     cb.set_label('Gene or virus expression\n(relative to highest cell)')
-    #fig.savefig('../../figures/fig4C.svg')
-    #fig.savefig('../../figures/fig4C.png')
+    fig.savefig('../../figures/fig4C.svg')
+    fig.savefig('../../figures/fig4C.png', dpi=600)
 
     # SUPPLEMENTARY FIG 5
     print('Plot many more genes, no good for paper')

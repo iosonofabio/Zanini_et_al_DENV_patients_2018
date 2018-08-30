@@ -184,86 +184,21 @@ if __name__ == '__main__':
     fig.text(0.02, 0.58, 'counts per million', rotation=90, ha='center')
     plt.tight_layout(rect=(0.03, 0.03, 1, 1))
 
-    ## FIG 4B
-    #print('Differential expression in infected B cells, selected genes')
-    #dsb = dss.query_samples_by_metadata('cellType == "B cell"')
-    #dsb.samplesheet.loc[:, 'infected'] = 'ambiguous'
-    #dsb.samplesheet.loc[dss.samplesheet['virus_reads_per_million'] >= nvr, 'infected'] = 'yes'
-    #dsb.samplesheet.loc[dss.samplesheet['virus_reads_per_million'] == 0, 'infected'] = 'no'
-
-    #dsb.counts.log(inplace=True)
-    #dsi = dsb.split(phenotypes=['infected'])
-    #comp = dsi['yes'].compare(dsi['no'])
-    #comp['avg_inf'] = dsi['yes'].counts.mean(axis=1)
-    #comp['avg_uninf'] = dsi['no'].counts.mean(axis=1)
-    #comp['fold-change'] = comp['avg_inf'] - comp['avg_uninf']
-
-    #genes = ['IGHM', 'IGHD', 'TCL1A', 'CXCR4', 'CD69', 'IRF1', 'FCRL1', 'TXNIP']
-    #dsbp = dsb.query_samples_by_metadata('infected != "ambiguous"')
-    #from matplotlib.patches import Rectangle
-    #fig, axs = plt.subplots(2, 4, sharex=True, sharey=True, figsize=(6.3, 4.5))
-    #axs = axs.ravel()
-    #for gname, ax in zip(genes, axs):
-    #    dfi = comp.loc[gname]
-    #    data = dsbp.counts.loc[[gname]].T
-    #    data['infected'] = dsbp.samplesheet['infected']
-    #    with sns.axes_style('whitegrid'):
-    #        sns.violinplot(
-    #                data=data,
-    #                x='infected',
-    #                y=gname,
-    #                inner='quartile',
-    #                ax=ax,
-    #                order=['no', 'yes'],
-    #                zorder=10,
-    #                )
-    #        plt.setp(ax.collections, alpha=.6)
-    #        sns.swarmplot(
-    #                data=data,
-    #                x='infected',
-    #                y=gname,
-    #                ax=ax,
-    #                order=['no', 'yes'],
-    #                zorder=10,
-    #                s=1.5,
-    #                alpha=1.0,
-    #                )
-    #    ax.set_title(gname)
-    #    ax.set_ylabel('')
-    #    ax.set_xlabel('')
-    #    ax.text(0.06, 0.96, 'P = {:.0e}'.format(dfi['P-value']),
-    #            ha='left',
-    #            va='top',
-    #            transform=ax.transAxes,
-    #            bbox={'edgecolor': 'grey', 'facecolor': 'white', 'alpha': 0.9, 'lw': 1, 'pad': 3},
-    #            )
-    #    for y in np.arange(-1, 6):
-    #        ax.plot([-1, 3], [y] * 2, lw=1, color='grey', alpha=0.5, zorder=0)
-    #ax.set_ylim(-1.1, 6.8)
-    #ax.set_yticks([-1, 0, 1, 2, 3, 4, 5])
-    #ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
-    #fig.text(0.5, 0.02,
-    #         'is the cell associated with DENV?'.format(nvr),
-    #         ha='center',
-    #         )
-    #fig.text(0.027, 0.63, 'counts per million', rotation=90, ha='center')
-    #fig.text(0.01, 0.98, 'B', ha='left', va='top', fontsize=14)
-    #plt.tight_layout(rect=(0.03, 0.03, 1, 1))
-
     if False:
         print('Plot dimensionality reduction of monocytes on differentially expressed genes')
-        dfdr = comp.nsmallest(100, columns=['P-value'])
-        dsdr = dsb.copy()
-        dsdr.counts = dsdr.counts.loc[dfdr.index]
-        # Exclude ribo/mito and batch effect genes
-        good_genes = [fn for fn in dsdr.featurenames if (fn not in ('COL6A3', 'TNR', 'ACACB')) and (not fn.startswith('MT')) and (not fn.startswith('RN'))]
-        dsdr.counts = dsdr.counts.loc[good_genes]
+        #dsdr = dsb.copy()
+        #dfdr = comp.nsmallest(100, columns=['P-value'])
+        #dsdr.counts = dsdr.counts.loc[dfdr.index]
+        ## Exclude ribo/mito and batch effect genes
+        #good_genes = [fn for fn in dsdr.featurenames if (fn not in ('COL6A3', 'TNR', 'ACACB')) and (not fn.startswith('MT')) and (not fn.startswith('RN'))]
+        #dsdr.counts = dsdr.counts.loc[good_genes]
 
+        dsdr = dsb.query_features_by_name(df.index)
 
         #vs = dsdr.dimensionality.pca(transform=None)
-        vs = dsdr.dimensionality.tsne(transform=None, perplexity=20)
+        vs = dsdr.dimensionality.tsne(transform=None, perplexity=10)
 
-        genes_plot = ['log_virus_reads_per_million', 'IGHD', 'experiment', 'SYK', 'TCL1A', 'none']
+        genes_plot = ['log_virus_reads_per_million'] + dsdr.featurenames[:5].tolist()
         fig, axs = plt.subplots(2, 3, figsize=(8, 6), sharex=True, sharey=True)
         axs = axs.ravel()
         x = vs.iloc[:, 0]
@@ -299,6 +234,9 @@ if __name__ == '__main__':
         ax.set_ylabel('dimension 2')
         plt.tight_layout()
 
+        plt.ion()
+        plt.show()
 
-    plt.ion()
-    plt.show()
+        # Look at correlations
+        corr = dsdr.correlation.correlate_features_features() - np.eye(dsdr.n_features)
+

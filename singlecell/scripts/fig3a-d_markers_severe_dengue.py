@@ -19,6 +19,8 @@ import seaborn as sns
 os.environ['SINGLET_CONFIG_FILENAME'] = 'singlet.yml'
 sys.path.append('/home/fabio/university/postdoc/singlet')
 from singlet.dataset import Dataset, CountsTable, FeatureSheet
+
+# NOTE: to run this script, add the repo folder to your PYTHONPATH
 from singlecell.modules.cell_subtypes import cell_subtypes
 
 
@@ -95,6 +97,8 @@ if __name__ == '__main__':
     print('Ignore X/Y-linked, HLA types and TCR and BCR variable regions')
     # Keep only autosomal genes
     genes_good = ds.featuresheet['Chromosome/scaffold name'].isin([str(i+1) for i in range(23)])
+    # Add back CD123 which is on X
+    genes_good['IL3RA'] = True
     # Discard HLA
     genes_good &= ~ds.featurenames.str.startswith('HLA')
     # Discard IGHV/IGKV/IGLV
@@ -187,7 +191,18 @@ if __name__ == '__main__':
     fig.text(0.01, 0.99, 'A', ha='left', va='top', fontsize=16)
     plt.tight_layout()
     #fig.savefig('../../figures/fig3A.svg')
-    #fig.savefig('../../figures/fig3A.png')
+    #fig.savefig('../../figures/fig3A.png', dpi=600)
+
+    print('Save table of P values')
+    pval_mat = pval_set.loc[:, pd.IndexSlice[:, :, 'P-value']]
+    pval_mat.columns = pval_mat.columns.droplevel(2)
+    pval_mat = pval_mat.loc[ll_genes[::-1], [tuple(c) for c in ll_subtypes]]
+    pval_mat = -np.log10(pval_mat)
+    pval_mat.to_csv('../../data/neglog10pvalues_fig3A.tsv', sep='\t', index=True, float_format='%.2f')
+
+    plt.ion()
+    plt.show()
+    sys.exit()
 
     # FIG 3B-D
     print('Plot distribution of genes common across cell types')
@@ -239,6 +254,7 @@ if __name__ == '__main__':
             ax.set_ylim(-1.1, 4.3)
             ax.set_yticks(np.log10(np.array([0.1, 1, 10, 100, 1000, 10000])))
             ax.set_yticklabels(['$0$', '$1$', '$10$', '$10^2$', '$10^3$', '$10^4$'])
+            ax.set_xlim(-0.5, 2.5)
             for yi in np.arange(-1, 5):
                 ax.plot([-1, 3], [yi, yi], lw=1, color='grey', zorder=0)
         rect = Rectangle(
@@ -257,8 +273,8 @@ if __name__ == '__main__':
     fig.text(0.01, 0.68, 'C', ha='left', va='top', fontsize=16)
     fig.text(0.01, 0.37, 'D', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.015, 0.04, 1, 1])
-    #fig.savefig('../../figures/fig3B-D.svg')
-    #fig.savefig('../../figures/fig3B-D.png')
+    fig.savefig('../../figures/fig3B-D.svg')
+    fig.savefig('../../figures/fig3B-D.png', dpi=600)
 
     plt.ion()
     plt.show()

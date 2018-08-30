@@ -18,7 +18,6 @@ cell_subtypes = {
         'isoswitched': 'isotype not in ("M", "D")',
         'isonaive': 'isotype in ("M", "D")',
         'plasma': '(MS4A1 < 100) & (PRDM1 >= 100)',
-        'tyrobp': '(TYROBP >= 100)',
         'all': '',
         },
     'NK cell': {
@@ -35,6 +34,9 @@ cell_subtypes = {
         'classical': '(CD14 >= 100) & (FCGR3A < 100)',
         'nonclassical': '(CD14 < 100) & (FCGR3A >= 100)',
         'double_positive': '(CD14 >= 100) & (FCGR3A >= 100)',
+        'all': '',
+        },
+    'pDC': {
         'all': '',
         },
     'all': {

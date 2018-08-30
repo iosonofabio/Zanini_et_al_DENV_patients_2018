@@ -19,6 +19,8 @@ import seaborn as sns
 os.environ['SINGLET_CONFIG_FILENAME'] = 'singlet.yml'
 sys.path.append('/home/fabio/university/postdoc/singlet')
 from singlet.dataset import Dataset, CountsTable, FeatureSheet
+
+# NOTE: to run this script, add the repo folder to your PYTHONPATH
 from singlecell.modules.cell_subtypes import cell_subtypes
 
 
@@ -213,7 +215,14 @@ if __name__ == '__main__':
                 label = gene
             else:
                 label = labels[ig]
-            ax.plot(xs, ys, lw=2, label=label, color=colors[ig], alpha=alpha)
+            xs = np.array(xs)
+            ys = np.array(ys)
+            # Calculate AUC via trapezoid rule
+            auc = (0.5 * np.diff(xs) * (ys[1:] + ys[:-1])).sum()
+            print(ct, cst, gene, 'AUC', '{:.2%}'.format(auc))
+
+            # Slight shift to show overlapping lines
+            ax.plot(xs + 0.01 * ig, ys, lw=2, label=label, color=colors[ig], alpha=alpha)
         ax.plot(np.linspace(0, 1, 100), np.linspace(0, 1, 100), color='grey')
         if legend:
             ax.legend(loc='lower right', fontsize=8)
@@ -271,7 +280,7 @@ if __name__ == '__main__':
     fig.text(0.02, 0.5, 'True positive rate', ha='center', va='center', rotation=90)
     fig.text(0.01, 0.99, 'E', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.03, 0.042, 1, 1], w_pad=0.5, h_pad=2.4)
-    #fig.savefig('../../figures/fig3E.png')
+    #fig.savefig('../../figures/fig3E.png', dpi=600)
     #fig.savefig('../../figures/fig3E.svg')
 
     plt.ion()

@@ -61,6 +61,7 @@ if __name__ == '__main__':
 
     print('Annotate dengue severity')
     ds.samplesheet['dengue_severity'] = 0
+    # FIXME FIXME FIXME: 10017014 is SD, 10017015 is DF!!!
     ds.samplesheet.loc[
             ds.samplesheet['experiment'].isin(['10017013', '10017015']),
             'dengue_severity'] = 1
@@ -124,6 +125,54 @@ if __name__ == '__main__':
         print('Load existing layout')
         layout_df = pd.read_csv(graph_layout_fn, sep='\t', index_col=0)
 
+
+    print('Cluster and identify the markers for the subpopulations')
+    from sklearn.cluster import KMeans
+    X = layout_df.values
+    nk = 20
+    kmeans = KMeans(n_clusters=nk, random_state=0).fit(X)
+    ds.samplesheet['kmeans'] = kmeans.labels_
+    x = layout_df.values[:, 0]
+    y = layout_df.values[:, 1]
+    fig, ax = plt.subplots(1, 1, figsize=(6, 4))
+    v = ds.samplesheet['kmeans'].values
+    vv = v.copy()
+    pal = sns.color_palette('husl', nk)
+    c = np.zeros((len(v), 3), float)
+    for i in range(nk):
+        c[vv == i] = pal[i]
+    v = (v - v.min()) / (v.max() - v.min())
+
+    # Plot higher dots on top
+    bins = [0, 0.2, 0.4, 0.6, 0.8, 1.1]
+    for ib in range(len(bins) - 1):
+        bmin = bins[ib]
+        bmax = bins[ib + 1]
+        ind = (v >= bmin) & (v < bmax)
+        ax.scatter(
+                x[ind], y[ind], c=c[ind],
+                s=20, alpha=0.1 + 0.02 * ib,
+                zorder=5 + ib,
+                )
+    # Plot centers
+    for i in range(nk):
+        xm = x[vv == i].mean()
+        ym = y[vv == i].mean()
+        ax.text(xm, ym, str(i), ha='center', va='center')
+    plt.tight_layout()
+
+    # Ok, it's clusters 0 and 8, do differential expression
+    ds.samplesheet['popSouth'] = ds.samplesheet['kmeans'] == 0
+    ds.samplesheet['popSouthWest'] = ds.samplesheet['kmeans'] == 8
+    for pop in ('popSouth', 'popSouthWest'):
+        dS = ds.split(phenotypes=pop)
+        comp = dS[True].compare(dS[False])
+        comp['meanlog+'] = np.log10(0.1 + dS[True].counts).mean(axis=1)
+        comp['meanlog-'] = np.log10(0.1 + dS[False].counts).mean(axis=1)
+        comp['foldChange'] = comp['meanlog+'] - comp['meanlog-']
+        print(comp.nlargest(20, columns=['foldChange']))
+
+
     print('Plot graph layout')
     genes_plot = [
             ('PTPRC', 'CD45'),
@@ -176,6 +225,13 @@ if __name__ == '__main__':
         orientation="vertical")
     cb.set_label('Gene or virus expression\n(relative to highest cell)')
 
+
+    #FIXME
+    plt.ion()
+    plt.show()
+
+    sys.exit()
+
     print('Plot number of cells for each cell type in various patients')
     n_cell_types = ds.samplesheet.groupby(['experiment', 'cellType']).size().unstack().fillna(0).stack().to_frame()
     n_cell_types.columns = ['n']
@@ -204,7 +260,7 @@ if __name__ == '__main__':
              va='top',
              fontsize=14)
 
-    fig.savefig('../../figures/fig2A-B.png', dpi=600)
+    fig.savefig('../../figures/fig2A-B.png')
     fig.savefig('../../figures/fig2A-B.svg')
 
     # SUPPLEMENTARY FIG 10
@@ -399,13 +455,25 @@ if __name__ == '__main__':
     dsBpl = dsB.query_features_by_name(markers_B, ignore_missing=True)
     vs = pd.read_csv('../../data/scatter_subtypes_Bcells.tsv', index_col=0, sep='\t')
 
+    print('Cluster and identify the markers for the subpopulations')
+    from sklearn.cluster import KMeans
+    X = vs.values
+    nk = 20
+    kmeans = KMeans(n_clusters=nk, random_state=0).fit(X)
+    dsBpl.samplesheet['kmeans'] = kmeans.labels_
+    vv = dsBpl.samplesheet['kmeans'].values
+    pal = sns.color_palette('husl', nk)
+    c = np.zeros((len(vv), 3), float)
+    for i in range(nk):
+        c[vv == i] = pal[i]
+
     genes_select = [None, 'MS4A1', 'TCL1A', 'CD40', 'CD69', 'PRDM1', 'TYROBP', 'IGHM', 'IGHG1', 'IGHA1']
     fig, axs = plt.subplots(2, 5, figsize=(9, 4), sharex=True, sharey=True)
     axs = axs.ravel()
     for gene, ax in zip(genes_select, axs):
         kwargs = {}
         if gene is None:
-            kwargs['color'] = 'grey'
+            continue
 
         dsBpl.plot.scatter_reduced_samples(
                 vs,
@@ -422,6 +490,26 @@ if __name__ == '__main__':
         ax.set_ylabel('')
         if gene is not None:
             ax.set_title(gene)
+    # Plot by cluster
+    axs[0].scatter(vs.values[:, 0], vs.values[:, 1], c=c, alpha=0.3, s=10)
+    # Plot centers
+    for i in range(nk):
+        xm = vs.values[:, 0][vv == i].mean()
+        ym = vs.values[:, 1][vv == i].mean()
+        axs[0].text(xm, ym, str(i), ha='center', va='center')
+
+    # Cluster 5 is pDCs, reset the cell type in the Google Sheet
+    pDCs = dsBpl.samplesheet.index[dsBpl.samplesheet['kmeans'] == 5]
+    from singlecell.googleapi.samplesheet import SampleSheet
+    ss = SampleSheet(sandbox=False)
+    data = ss.get_data(sheetname='sequenced')
+    header = data[0]
+    name_col = header.index('name')
+    cell_type_col = header.index('cellType')
+    for datum in data[1:]:
+        if datum[name_col] in pDCs:
+            datum[cell_type_col] = 'pDC'
+    #ss.set_sheet(sheetname='sequenced', values=data)
 
     fig.text(0.5, 0.02, 'dimension 1', ha='center')
     fig.text(0.02, 0.5, 'dimension 2', ha='center', va='center', rotation=90)
@@ -536,8 +624,8 @@ if __name__ == '__main__':
     fig.text(0.5, 0.03, 'dimension 1', ha='center')
     fig.text(0.024, 0.5, 'dimension 2', ha='center', va='center', rotation=90)
     plt.tight_layout(rect=[0.005, 0.04, 1, 0.96])
-    #fig.savefig('../../figures/fig2C.png')
-    #fig.savefig('../../figures/fig2C.svg')
+    #fig.savefig('../../figures/fig2H.png')
+    #fig.savefig('../../figures/fig2H.svg')
 
     plt.ion()
     plt.show()
