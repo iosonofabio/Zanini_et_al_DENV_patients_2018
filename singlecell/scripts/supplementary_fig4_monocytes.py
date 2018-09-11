@@ -237,6 +237,30 @@ if __name__ == '__main__':
         plt.ion()
         plt.show()
 
-        # Look at correlations
-        corr = dsdr.correlation.correlate_features_features() - np.eye(dsdr.n_features)
+    print('Check correlated genes and run Gene Ontology')
+    genes = df.index
+    corr = dsb.correlation.correlate_features_features(features='all', features2=genes).fillna(0)
+    for gene in genes:
+        corr.loc[gene, gene] = 0
+    for gene in genes:
+        tmp_pos = corr.loc[:, gene].nlargest(5)
+        tmp_neg = corr.loc[:, gene].nsmallest(5)
+        print(gene)
+        for gn, val in tmp_pos.items():
+            print('{:15s}: {:.2f}'.format(gn, val))
+        for gn, val in tmp_neg.items():
+            print('{:15s}: {:.2f}'.format(gn, val))
+        print()
+
+    # Save list of genes and close correlates for Gene Ontology analysis
+    genes_corr = genes.tolist()
+    for gene in genes:
+        tmp_pos = corr.loc[:, gene].nlargest(20).index.tolist()
+        tmp_neg = corr.loc[:, gene].nsmallest(20).index.tolist()
+        genes_corr.extend(tmp_pos)
+        genes_corr.extend(tmp_neg)
+    genes_corr = np.unique(genes_corr)
+    with open('../../data/monocyte_virus_genes_corr.txt', 'wt') as f:
+        f.write(' '.join(genes_corr))
+    print('The actual GO is run with Panther 11 online: http://pantherdb.org/')
 
