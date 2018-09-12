@@ -2,13 +2,7 @@
 '''
 author:     Fabio Zanini
 date:       27/05/18
-content:    Figure 2 shows that we capture and identify many cell types from
-            human blood. Minor points:
-            - little batch effects (or can be controlled)
-            - enrichment factor (look at FACS data)
-
-            Note that this figure should be rather compact but can have
-            supplementary figures for support.
+content:    Supplementary Fig 12 shows the level of cross-talk in virus reads.
 '''
 # Modules
 import os
@@ -49,8 +43,6 @@ if __name__ == '__main__':
     ds.featuresheet['EnsemblID'] = ds.featurenames
     ds.rename(axis='features', column='GeneName', inplace=True)
 
-    sys.exit()
-
     print('Set normalized dengue reads')
     n = ds.samplesheet['numberDengueReads'].astype(float)
     cov = ds.samplesheet['coverage'].astype(float)
@@ -89,7 +81,6 @@ if __name__ == '__main__':
     genes_good &= ~ds.featurenames.str.startswith('RP5')
     genes_good &= ~ds.featurenames.str.startswith('RP11')
     ds.counts = ds.counts.loc[genes_good]
-
 
     # Check background DENV reads in healthy controls
     ns = {}
