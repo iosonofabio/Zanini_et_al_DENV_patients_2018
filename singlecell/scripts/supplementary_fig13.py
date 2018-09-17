@@ -89,16 +89,19 @@ def max_distance_cumulative(data1, data2):
     return (d, x)
 
 
-def plot_KS(dss, top_genes):
-    fig, axs = plt.subplots(3, 5, figsize=(8, 4), sharex=True, sharey=True)
-    axs = axs.ravel()
+def plot_KS(dss, top_genes, n_plots=None):
+    if n_plots:
+        fig, axs = plt.subplots(n_plots, 1, figsize=(2.1, 0.9 + 1.2 * n_plots), sharex=True, sharey=True)
+    else:
+        fig, axs = plt.subplots(3, 5, figsize=(8, 4), sharex=True, sharey=True)
+        axs = axs.ravel()
     for gene, ax in zip(top_genes, axs):
-        x1 = 0.1 + np.sort(dss[False].counts.loc[gene].values)
-        y1 = 1.0 - np.linspace(0, 1, len(x1))
-        ax.plot(x1, y1, color='steelblue', label='ns')
         x2 = np.sort(dss[True].counts.loc[gene].values)
         y2 = 1.0 - np.linspace(0, 1, len(x2))
         ax.plot(x2, y2, color='darkred', label='s')
+        x1 = 0.1 + np.sort(dss[False].counts.loc[gene].values)
+        y1 = 1.0 - np.linspace(0, 1, len(x1))
+        ax.plot(x1, y1, color='steelblue', label='ns')
         ax.grid(True)
         ax.set_title(gene)
 
@@ -108,11 +111,16 @@ def plot_KS(dss, top_genes):
 
     axs[0].legend(loc='upper right', fontsize=8)
     axs[0].set_xlim(0.9e-1, 1e5)
-    axs[0].set_ylim(0.9e-2, 1.02)
+    axs[0].set_ylim(-0.02, 1.02)
     axs[0].set_xscale('log')
-    fig.text(0.52, 0.02, 'cpm', ha='center')
-    fig.text(0.02, 0.52, '% cells > x', ha='center', va='center', rotation=90)
-    plt.tight_layout(rect=(0.02, 0.02, 1, 1))
+    if n_plots:
+        fig.text(0.06, 0.52, 'fraction of cells > x', ha='center', va='center', rotation=90)
+        fig.text(0.52, 0.02, 'counts per million', ha='center')
+        plt.tight_layout(rect=(0.06, 0.02, 1, 1), h_pad=0.1)
+    else:
+        fig.text(0.02, 0.52, 'fraction of cells > x', ha='center', va='center', rotation=90)
+        fig.text(0.52, 0.02, 'cpm', ha='center')
+        plt.tight_layout(rect=(0.02, 0.02, 1, 1))
 
     return {
         'fig': fig,
@@ -218,6 +226,7 @@ if __name__ == '__main__':
 
 
         # Try different numbers of genes
+        panelA = False
         results = []
         for ntop in (5, 9, 15, 21, 26, 31, 41, 51, 61, 81, 101):
             top_genes = comp['P-value'].nsmallest(ntop).index
@@ -232,7 +241,16 @@ if __name__ == '__main__':
             distances = {x[0]: (x[1], x[2]) for x in distances}
 
             # Make cute plots
-            #d = plot_KS(dss, top_genes)
+            if not panelA:
+                d = plot_KS(dss, top_genes, n_plots=3)
+                fig = d['fig']
+                print(ct)
+                fig.savefig('../../figures/supplementary_fig13A.png', dpi=600)
+                fig.savefig('../../figures/supplementary_fig13A.svg')
+                panelA = True
+
+                #FIXME
+                sys.exit()
             #plt.ion()
             #plt.show()
 
@@ -422,8 +440,8 @@ if __name__ == '__main__':
     ax.set_ylabel('True positive rate')
     ax.legend(loc='lower right', fontsize=9, ncol=2)
     plt.tight_layout()
-    fig.savefig('../../figures/supplementary_fig13.png', dpi=600)
-    fig.savefig('../../figures/supplementary_fig13.svg')
+    #fig.savefig('../../figures/supplementary_fig13C.png', dpi=600)
+    #fig.savefig('../../figures/supplementary_fig13C.svg')
 
     plt.ion()
     plt.show()
