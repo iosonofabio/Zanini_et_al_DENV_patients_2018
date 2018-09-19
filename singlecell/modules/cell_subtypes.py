@@ -5,8 +5,6 @@ date:       21/06/18
 content:    Support module with criteria for cell subtypes
 '''
 cell_subtypes = {
-    # NOTE: CD3+ CD56+ T/NK cells are probably gd-Tcells rather than NKT,
-    # but I have to double check
     'T cell': {
         'helper': '(CD4 >= 100) & (CD8A < 100) & (CD8B < 100)',
         'killer': '(CD4 < 100) & ((CD8A >= 100) | (CD8B >= 100))',

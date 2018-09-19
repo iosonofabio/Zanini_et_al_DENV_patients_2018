@@ -18,10 +18,46 @@ import seaborn as sns
 
 os.environ['SINGLET_CONFIG_FILENAME'] = 'singlet.yml'
 sys.path.append('/home/fabio/university/postdoc/singlet')
-from singlet.dataset import Dataset, CountsTable, FeatureSheet
+from singlet.dataset import Dataset
 
-# NOTE: to run this script, add the repo folder to your PYTHONPATH
-from singlecell.modules.cell_subtypes import cell_subtypes
+
+cell_subtypes = {
+    'T cell': {
+        'helper': '(CD4 >= 100) & (CD8A < 100) & (CD8B < 100)',
+        'killer': '(CD4 < 100) & ((CD8A >= 100) | (CD8B >= 100))',
+        'cytolytic': '(PRF1 >= 100) | (GZMB >= 100) | (GZMA >= 100)',
+        'all': '',
+        },
+    'B cell': {
+        'naive': '(TCL1A >= 100) & ((IGHM >= 100) | (IGHD >= 100))',
+        'isoswitched': 'isotype not in ("M", "D")',
+        'isonaive': 'isotype in ("M", "D")',
+        'plasma': '(MS4A1 < 100) & (PRDM1 >= 100)',
+        'all': '',
+        },
+    'NK cell': {
+        # The first 4 are relatively well described subsets
+        'CD56+': '(NCAM1 >= 100)',
+        'CD16+': '(FCGR3A >= 100)',
+        'CD62L+': '(SELL >= 100)',
+        'CD57+': '(B3GAT1 >= 100)',
+        'KIR2DL3+': '(KIR2DL3 >= 100)',
+        'KLRB1+': '(KLRB1 >= 100)',
+        'all': '',
+        },
+    'monocyte': {
+        'classical': '(CD14 >= 100) & (FCGR3A < 100)',
+        'nonclassical': '(CD14 < 100) & (FCGR3A >= 100)',
+        'double_positive': '(CD14 >= 100) & (FCGR3A >= 100)',
+        'all': '',
+        },
+    'pDC': {
+        'all': '',
+        },
+    'all': {
+        'all': '',
+        }
+    }
 
 
 
@@ -37,7 +73,6 @@ def split_cells_by_subtype(ds, cell_subtypes):
             dsct = ds
         for cst, query in subtypes.items():
             print(ct, cst)
-            # FIXME: refine
             if 'isotype' in query:
                 dscst = dsct.query_samples_by_metadata(query)
             elif cst == 'all':
@@ -69,6 +104,14 @@ def split_cells_by_subtype(ds, cell_subtypes):
 # Script
 if __name__ == '__main__':
 
+    pa = argparse.ArgumentParser(
+        description='Analyze differential expression in severe dengue.')
+    pa.add_argument(
+        '--onlyfemale', action='store_true',
+        help='Exclude male samples',
+        )
+    args = pa.parse_args()
+
     print('Load data (L1 normalized)')
     ds = Dataset(
             samplesheet='dengue_patients',
@@ -93,6 +136,15 @@ if __name__ == '__main__':
             ds.samplesheet['experiment'].isin(['10017014', '10017016', '10017021', '10017022']),
             'dengue_severity'] = 2
     ds.samplesheet['severe_dengue'] = ds.samplesheet['dengue_severity'] == 2
+
+    print('Annotate patient gender')
+    ds.samplesheet['patientGender'] = 'F'
+    ds.samplesheet.loc[
+            ds.samplesheet['patientSample'].isin(['3-13-1', '3-006-1']),
+            'patientGender'] = 'M'
+
+    if args.onlyfemale:
+        ds.query_samples_by_metadata('patientGender == "F"', inplace=True)
 
     print('Ignore X/Y-linked, HLA types and TCR and BCR variable regions')
     # Keep only autosomal genes
@@ -198,11 +250,7 @@ if __name__ == '__main__':
     pval_mat.columns = pval_mat.columns.droplevel(2)
     pval_mat = pval_mat.loc[ll_genes[::-1], [tuple(c) for c in ll_subtypes]]
     pval_mat = -np.log10(pval_mat)
-    pval_mat.to_csv('../../data/neglog10pvalues_fig3A.tsv', sep='\t', index=True, float_format='%.2f')
-
-    plt.ion()
-    plt.show()
-    sys.exit()
+    #pval_mat.to_csv('../../data/neglog10pvalues_fig3A.tsv', sep='\t', index=True, float_format='%.2f')
 
     # FIG 3B-D
     print('Plot distribution of genes common across cell types')
@@ -273,8 +321,8 @@ if __name__ == '__main__':
     fig.text(0.01, 0.68, 'C', ha='left', va='top', fontsize=16)
     fig.text(0.01, 0.37, 'D', ha='left', va='top', fontsize=16)
     plt.tight_layout(rect=[0.015, 0.04, 1, 1])
-    fig.savefig('../../figures/fig3B-D.svg')
-    fig.savefig('../../figures/fig3B-D.png', dpi=600)
+    #fig.savefig('../../figures/fig3B-D.svg')
+    #fig.savefig('../../figures/fig3B-D.png', dpi=600)
 
     plt.ion()
     plt.show()
