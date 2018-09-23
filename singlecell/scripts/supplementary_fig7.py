@@ -103,8 +103,8 @@ if __name__ == '__main__':
     ax.set_xlabel('# of DENV reads')
     ax.set_ylabel('Fraction of cells with >= x DENV reads')
     plt.tight_layout()
-    fig.savefig('../../data/supplementary_fig13.png', dpi=600)
-    fig.savefig('../../data/supplementary_fig13.svg')
+    fig.savefig('../../data/supplementary_fig7.png', dpi=600)
+    fig.savefig('../../data/supplementary_fig7.svg')
 
     plt.ion()
     plt.show()

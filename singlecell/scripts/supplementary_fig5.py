@@ -201,8 +201,8 @@ def build_test_model(
             print(ct)
             d = plot_KS(dss, top_genes, distances, n_plots=3)
             fig = d['fig']
-            #fig.savefig('../../figures/supplementary_fig12A.png', dpi=600)
-            #fig.savefig('../../figures/supplementary_fig12A.svg')
+            #fig.savefig('../../figures/supplementary_fig5A.png', dpi=600)
+            #fig.savefig('../../figures/supplementary_fig5A.svg')
             panelA = True
 
         #######################
@@ -327,7 +327,7 @@ def split_train_test(dst, frac_train=0.90):
     return dstt
 
 
-def plot_supplementary_fig12(results_alltypes):
+def plot_supplementary_fig5(results_alltypes):
     fig, ax = plt.subplots(1, 1, figsize=(3.8, 3.65))
     colors = sns.color_palette(n_colors=len(args.celltypes))
     for ir, ct in enumerate(celltypes_plot):
@@ -507,11 +507,11 @@ if __name__ == '__main__':
 
     celltypes_plot = ['T cell', 'NK cell', 'NKT cell', 'B cell', 'monocyte', 'pDC', 'cDC']
     if all(x in args.celltypes for x in celltypes_plot):
-        print('Plot everything in one axes, supplementary fig 12')
-        d = plot_supplementary_fig12(results_alltypes)
+        print('Plot everything in one axes, supplementary fig 5')
+        d = plot_supplementary_fig5(results_alltypes)
         fig = d['fig']
-        #fig.savefig('../../figures/supplementary_fig12C.png', dpi=600)
-        #fig.savefig('../../figures/supplementary_fig12C.svg')
+        #fig.savefig('../../figures/supplementary_fig5C.png', dpi=600)
+        #fig.savefig('../../figures/supplementary_fig5C.svg')
 
     print('Cross validation')
     celltypes = args.celltypes
@@ -539,11 +539,11 @@ if __name__ == '__main__':
 
     celltypes_plot = ['T cell', 'NK cell', 'NKT cell', 'B cell', 'monocyte', 'pDC', 'cDC']
     if all(x in args.celltypes for x in celltypes_plot):
-        print('Plot everything in one axes, supplementary fig 12')
-        d = plot_supplementary_fig12(results_alltypes_cv)
+        print('Plot everything in one axes, supplementary fig 5')
+        d = plot_supplementary_fig5(results_alltypes_cv)
         fig = d['fig']
-        fig.savefig('../../figures/supplementary_fig12C.png', dpi=600)
-        fig.savefig('../../figures/supplementary_fig12C.svg')
+        fig.savefig('../../figures/supplementary_fig5C.png', dpi=600)
+        fig.savefig('../../figures/supplementary_fig5C.svg')
 
 
     plt.ion()
